@@ -29,8 +29,7 @@ OUTPUT_PATH = ROOT / "docs" / "recommendations.json"
 ET = ZoneInfo("America/New_York")
 
 FINNHUB_KEY = os.environ.get("FINNHUB_KEY", "")
-TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN", "")
-TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "")
+DISCORD_WEBHOOK = os.environ.get("DISCORD_WEBHOOK", "")
 
 
 def load_config() -> dict:
@@ -223,26 +222,29 @@ def build_paste_block(alert: dict) -> str:
 # ---------------------------------------------------------------------------
 # Delivery
 # ---------------------------------------------------------------------------
-def push_telegram(alert: dict, paste: str):
-    if not (TELEGRAM_TOKEN and TELEGRAM_CHAT_ID):
+def push_discord(alert: dict, paste: str):
+    if not DISCORD_WEBHOOK:
         return
     icon = {"move": "\U0001F4C8", "catalyst": "\u26A1", "level": "\U0001F3AF"}.get(alert["type"], "\U0001F514")
     held = " (you hold)" if alert.get("held") else ""
-    # The paste block goes in a code block so you can one-tap copy it in Telegram.
-    msg = (
-        f"{icon} *{alert['ticker']}*{held}\n"
+    # Discord renders ``` code fences too, so the paste block stays one-tap copyable.
+    content = (
+        f"{icon} **{alert['ticker']}**{held}\n"
         f"{alert['reason']}\n\n"
         f"Paste into Claude:\n"
         f"```\n{paste}\n```"
     )
+    # Discord caps a message at 2000 chars; trim defensively.
+    if len(content) > 1990:
+        content = content[:1985] + "\n```"
     try:
         requests.post(
-            f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage",
-            json={"chat_id": TELEGRAM_CHAT_ID, "text": msg, "parse_mode": "Markdown"},
+            DISCORD_WEBHOOK,
+            json={"content": content},
             timeout=10,
         )
     except Exception as e:
-        print(f"  telegram push failed: {e}", file=sys.stderr)
+        print(f"  discord push failed: {e}", file=sys.stderr)
 
 
 # ---------------------------------------------------------------------------
@@ -290,7 +292,7 @@ def main():
     print(f"  wrote {OUTPUT_PATH}")
 
     for a in alerts:
-        push_telegram(a, a["paste_block"])
+        push_discord(a, a["paste_block"])
         print(f"  pushed {a['ticker']} ({a['type']})")
 
 
