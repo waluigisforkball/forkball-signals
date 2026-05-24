@@ -1,0 +1,57 @@
+# ============================================================
+# Forkball Signals — config (ZERO-COST version)
+# Edit this to control what the scanner watches and what trips an alert.
+# No AI, no tokens. Only Finnhub/Telegram keys live in GitHub Secrets.
+# ============================================================
+
+# --- Positions you hold (watched closely; can set level alerts) ---
+# account: robinhood (taxable) | merrill (IRA)
+# type: shares | call | put
+# Optional: alert_above / alert_below to ping when price crosses a level.
+positions:
+  - ticker: IVV
+    account: merrill
+    type: shares
+    note: "long-term core"
+  - ticker: QQQ
+    account: merrill
+    type: shares
+    note: "long-term core"
+    # alert_below: 500     # uncomment to get pinged if QQQ drops under 500
+    # move_threshold: 1.5  # this position alerts on a smaller move than the default
+  # Example options position with a level alert:
+  # - ticker: USO
+  #   account: robinhood
+  #   type: put
+  #   strike: 72
+  #   expiry: 2026-06-19
+  #   alert_below: 70
+  #   note: "Iran/oil rubber-band play"
+
+# --- Watchlist: scanned for moves + catalysts even if not held ---
+watchlist:
+  - USO
+  - SPY
+  - NVDA
+
+# --- Catalyst hunting: headline keyword themes ---
+catalyst_themes:
+  - keywords: ["Iran", "oil", "OPEC", "Strait of Hormuz", "crude"]
+    relevant_tickers: ["USO", "XLE"]
+    note: "Middle East oil rubber-band pattern"
+  - keywords: ["Fed", "FOMC", "rate cut", "CPI", "inflation", "Powell"]
+    relevant_tickers: ["SPY", "QQQ", "IVV"]
+    note: "macro regime"
+
+# --- Scan behavior ---
+settings:
+  # Default: a ticker moving at least this % (up or down) triggers a "move" alert.
+  move_threshold_pct: 2.0
+  # Per-ticker overrides. Tighter for calm core holds, looser for volatile names.
+  # Resolution order: a position's own move_threshold > this map > the default above.
+  thresholds:
+    IVV: 1.0    # core hold — even a 1% move is worth a look
+    QQQ: 1.5
+    NVDA: 4.0   # high-beta — ignore normal daily chop, only flag big moves
+  # Skip scans when US market is closed (ET hours).
+  market_hours_only: true
