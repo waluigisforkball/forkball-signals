@@ -29,19 +29,37 @@ positions:
   #   note: "Iran/oil rubber-band play"
 
 # --- Watchlist: scanned for moves + catalysts even if not held ---
+# Two ways to list a ticker:
+#   1. Just the symbol (simple):            - SPY
+#   2. Symbol with an intent tag (richer):  - {ticker: ADBE, tag: watch}
+# Tags are only used by the DAILY BRIEF to frame its read. Options:
+#   core  = long-term quality; a selloff may be a discount for the IRA
+#   swing = short-term / momentum / lotto; treat moves as trade setups
+#   watch = neutral; just keep an eye on it
+# Untagged tickers are treated as "watch".
 watchlist:
-  - USO
   - SPY
-  - NVDA
+  - QQQ
+  - {ticker: NVDA, tag: swing}
+  - {ticker: ADBE, tag: core}
+  # Add your own, e.g.:
+  # - {ticker: PLTR, tag: swing}
+  # - {ticker: GOOGL, tag: core}
 
-# --- Catalyst hunting: headline keyword themes ---
+# --- Catalyst hunting: BROAD market-moving events only ---
+# Kept deliberately narrow to high-impact, whole-market catalysts so the
+# intraday scanner doesn't spam on routine sector chatter. Day-to-day "why did
+# X move" analysis is the daily brief's job, not the keyword scanner's.
 catalyst_themes:
-  - keywords: ["Iran", "oil", "OPEC", "Strait of Hormuz", "crude"]
-    relevant_tickers: ["USO", "XLE"]
-    note: "Middle East oil rubber-band pattern"
-  - keywords: ["Fed", "FOMC", "rate cut", "CPI", "inflation", "Powell"]
+  - keywords: ["Federal Reserve", "FOMC", "rate cut", "rate hike", "Powell"]
     relevant_tickers: ["SPY", "QQQ", "IVV"]
-    note: "macro regime"
+    note: "Fed / monetary policy"
+  - keywords: ["CPI", "inflation report", "jobs report", "nonfarm payrolls", "unemployment rate"]
+    relevant_tickers: ["SPY", "QQQ"]
+    note: "key economic data"
+  - keywords: ["tariff", "trade war", "trade deal"]
+    relevant_tickers: ["SPY", "QQQ"]
+    note: "trade / tariffs"
 
 # --- Scan behavior ---
 settings:
@@ -55,3 +73,28 @@ settings:
     NVDA: 4.0   # high-beta — ignore normal daily chop, only flag big moves
   # Skip scans when US market is closed (ET hours).
   market_hours_only: true
+
+# ============================================================
+# Capitol Trades tracker (separate nightly job, capitol.py)
+# Data: Financial Modeling Prep (FMP) free tier — needs FMP_API_KEY secret.
+# Covers House + Senate "latest disclosures" feeds with real filing dates.
+# By law these are STOCK Act disclosures and can lag up to 45 days after the
+# actual trade — this tracks NEWLY DISCLOSED trades, not real-time activity.
+# ============================================================
+capitol:
+  # Track both chambers. Set either to false to skip it.
+  track_house: true
+  track_senate: true
+  # The dashboard shows ALL disclosed trades. Discord only pings for trades
+  # whose minimum disclosed dollar amount is at least this floor. This keeps
+  # the channel signal-only while the dashboard keeps the full firehose.
+  # Set to 0 to ping on literally every disclosed trade (very noisy).
+  alert_min_amount: 50000
+  # Optional: spotlight specific names — these always ping regardless of the
+  # dollar floor (e.g. high-profile traders or your own representative).
+  # Leave empty [] to rely on the dollar floor alone.
+  spotlight_politicians:
+    - "Pelosi"
+    - "Olszewski"
+  # How many days back to consider a filing "new" on first run / catch-up.
+  lookback_days: 14
