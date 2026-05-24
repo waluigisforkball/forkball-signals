@@ -1,0 +1,48 @@
+name: Forkball Signals Scan
+
+on:
+  schedule:
+    # Times are UTC. US market is 9:30-16:00 ET.
+    # ET = UTC-5 (EST) / UTC-4 (EDT). These cover the EDT window;
+    # the script's market_hours_only check skips off-hours regardless,
+    # so a couple of extra fires near the edges are harmless (and free).
+    - cron: '35 13 * * 1-5'   # ~9:35 ET open scan
+    - cron: '0 16 * * 1-5'    # ~12:00 ET midday
+    - cron: '0 19 * * 1-5'    # ~15:00 ET power hour
+  workflow_dispatch:           # lets you trigger a scan manually from the Actions tab
+
+# Allow the workflow to commit the updated JSON back to the repo
+permissions:
+  contents: write
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install deps
+        run: pip install -r requirements.txt
+
+      - name: Run scan
+        env:
+          FINNHUB_KEY: ${{ secrets.FINNHUB_KEY }}
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python scan.py
+
+      - name: Commit results
+        run: |
+          git config user.name  "forkball-bot"
+          git config user.email "actions@github.com"
+          git add docs/recommendations.json
+          if git diff --staged --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "scan: $(date -u +'%Y-%m-%d %H:%M UTC')"
+            git push
+          fi
