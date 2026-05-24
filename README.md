@@ -2,7 +2,7 @@
 
 A **completely free** scheduled market tripwire. It watches your positions,
 watchlist, and catalyst themes; when something trips a rule (a price move, a
-catalyst keyword, a level cross) it pushes you a Telegram alert and posts it to a
+catalyst keyword, a level cross) it pushes you a Discord alert and posts it to a
 dashboard. Each alert carries a **ready-to-paste block** — tap copy, paste into
 Claude in the app, and your `mike-market-analyst` skill does the analysis for free.
 
@@ -15,7 +15,7 @@ Claude in the app, and your `mike-market-analyst` skill does the analysis for fr
 | Scheduler | GitHub Actions (cron) | Free |
 | Quotes + news | Finnhub free tier | Free |
 | Dashboard host | GitHub Pages | Free |
-| Alerts | Telegram Bot API | Free |
+| Alerts | Discord webhook | Free |
 | Analysis | **You paste into Claude** | Free (your normal chat usage) |
 
 No always-on server, no Anthropic API key, no per-scan cost. The only "limit" is
@@ -45,14 +45,12 @@ finnhub.io → free account → copy the API key.
 ### 3. Add Secrets
 Repo → Settings → Secrets and variables → Actions → New repository secret:
 - `FINNHUB_KEY` (required for quotes/news)
-- `TELEGRAM_TOKEN` (optional — for push)
-- `TELEGRAM_CHAT_ID` (optional)
+- `DISCORD_WEBHOOK` (optional — for push alerts)
 
-### 4. Telegram push (optional, free)
-1. Message **@BotFather** → `/newbot` → copy the **token** = `TELEGRAM_TOKEN`.
-2. Message your new bot "hi".
-3. Open `https://api.telegram.org/bot<TOKEN>/getUpdates` → find `"chat":{"id":...}`
-   = `TELEGRAM_CHAT_ID`.
+### 4. Discord push (optional, free)
+In Discord: pick a channel → gear icon (Edit Channel) → Integrations → Webhooks →
+New Webhook → name it → **Copy Webhook URL**. That single URL is your
+`DISCORD_WEBHOOK` secret. No bot, no token, no chat ID.
 
 Skip this and you still get the dashboard — you just check it instead of being pinged.
 
@@ -72,8 +70,8 @@ closed? It logs "skipping" — correct. To force an off-hours test, set
 
 ## Daily use
 
-1. Alert lands (Telegram push or on the dashboard).
-2. Tap **Copy paste-block for Claude** (dashboard) or long-press the code block (Telegram).
+1. Alert lands (Discord push or on the dashboard).
+2. Tap **Copy paste-block for Claude** (dashboard) or copy the code block (Discord).
 3. Paste into Claude in the app. Your market-analyst skill fires → full three-lens
    analysis, invalidation, the works.
 4. You decide and execute manually.
