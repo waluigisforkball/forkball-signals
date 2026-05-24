@@ -1,0 +1,43 @@
+name: Forkball Daily Brief
+
+on:
+  schedule:
+    # ~4:35 PM ET after the close (UTC times; covers EDT).
+    # The script skips weekends itself, so a weekend fire is a harmless no-op.
+    - cron: '35 20 * * 1-5'
+  workflow_dispatch:        # manual trigger from the Actions tab
+
+permissions:
+  contents: write
+
+jobs:
+  brief:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install deps
+        run: pip install -r requirements.txt
+
+      - name: Generate brief
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          FINNHUB_KEY: ${{ secrets.FINNHUB_KEY }}
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: python daily_brief.py
+
+      - name: Commit results
+        run: |
+          git config user.name  "forkball-bot"
+          git config user.email "actions@github.com"
+          git add docs/brief.json docs/brief_state.json
+          if git diff --staged --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "brief: $(date -u +'%Y-%m-%d %H:%M UTC')"
+            git push
+          fi
