@@ -37,6 +37,22 @@ def load_config() -> dict:
         return yaml.safe_load(f)
 
 
+def watchlist_entries(config: dict) -> list[dict]:
+    """Normalize watchlist into [{ticker, tag}], accepting plain strings or
+    {ticker, tag} dicts. Untagged -> 'watch'."""
+    out = []
+    for item in config.get("watchlist", []):
+        if isinstance(item, str):
+            out.append({"ticker": item, "tag": "watch"})
+        elif isinstance(item, dict) and item.get("ticker"):
+            out.append({"ticker": item["ticker"], "tag": item.get("tag", "watch")})
+    return out
+
+
+def watchlist_tickers(config: dict) -> list[str]:
+    return [e["ticker"] for e in watchlist_entries(config)]
+
+
 def market_is_open(now_et: dt.datetime) -> bool:
     if now_et.weekday() >= 5:
         return False
@@ -258,7 +274,7 @@ def main():
         return
 
     tickers = [p["ticker"] for p in config.get("positions", [])]
-    tickers += config.get("watchlist", [])
+    tickers += watchlist_tickers(config)
     tickers = list(dict.fromkeys(tickers))
     print(f"Scanning {len(tickers)} tickers at {now_et:%Y-%m-%d %H:%M ET}")
 
