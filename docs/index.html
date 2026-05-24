@@ -88,6 +88,48 @@ body{
 .copy.done{background:#00a86b;border-color:#00a86b;color:#fff;}
 
 .empty{text-align:center;color:var(--text-muted);padding:40px 20px;font-size:15px;}
+
+.section-label{font-family:'Nunito',sans-serif;font-weight:900;font-size:14px;
+  text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);
+  margin:24px 0 12px;padding-bottom:6px;border-bottom:2px solid var(--border);}
+
+.brief-wrap{position:relative;margin-bottom:8px;}
+.brief-shadow{position:absolute;top:5px;left:5px;right:-5px;bottom:-5px;
+  background:var(--border-dark);border-radius:16px;z-index:0;}
+.brief{position:relative;z-index:1;background:var(--surface);
+  border:2.5px solid var(--accent);border-radius:16px;padding:16px 17px;}
+.brief-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.brief-head .label{font-family:'Nunito',sans-serif;font-weight:900;font-size:15px;
+  color:var(--accent);text-transform:uppercase;letter-spacing:.5px;}
+.brief-head .date{margin-left:auto;font-size:12px;font-weight:700;color:var(--text-dim);}
+.brief-body{font-size:14.5px;line-height:1.55;color:var(--text);white-space:pre-wrap;}
+.brief-body strong{font-weight:800;}
+.deep-tag{display:inline-block;margin-top:10px;font-size:10px;font-weight:800;
+  padding:3px 8px;border-radius:7px;background:var(--accent-light);color:var(--accent);
+  text-transform:uppercase;letter-spacing:.5px;}
+
+.tabs{display:flex;gap:8px;margin-bottom:18px;}
+.tab{flex:1;border-radius:12px;font-family:'Nunito',sans-serif;font-weight:900;
+  font-size:14px;border:2.5px solid var(--border-dark);background:var(--surface);
+  color:var(--text-muted);padding:10px;cursor:pointer;text-transform:uppercase;
+  letter-spacing:.5px;}
+.tab.active{background:var(--accent);border-color:var(--accent);color:#063d39;}
+
+.cap-row{display:flex;align-items:center;gap:10px;background:var(--surface);
+  border:2px solid var(--border);border-left-width:6px;border-radius:12px;
+  padding:10px 13px;margin-bottom:9px;}
+.cap-row.buy{border-left-color:var(--bull,#00a86b);}
+.cap-row.sell{border-left-color:var(--bear,#e8234a);}
+.cap-main{flex:1;min-width:0;}
+.cap-pol{font-family:'Nunito',sans-serif;font-weight:800;font-size:14px;}
+.cap-sub{font-size:11.5px;color:var(--text-muted);margin-top:1px;}
+.cap-tk{font-family:'Nunito',sans-serif;font-weight:900;font-size:16px;
+  white-space:nowrap;}
+.cap-tk small{display:block;font-size:10px;font-weight:700;text-align:right;
+  text-transform:uppercase;letter-spacing:.5px;}
+.cap-tk small.buy{color:var(--bull,#00a86b);} .cap-tk small.sell{color:var(--bear,#e8234a);}
+.cap-amt{font-size:11px;color:var(--text-dim);white-space:nowrap;text-align:right;}
+.cap-floor{font-size:11px;color:var(--text-dim);margin-bottom:12px;font-weight:700;}
 </style>
 </head>
 <body>
@@ -99,9 +141,22 @@ body{
 </div>
 
 <div class="main">
-  <div class="qbar" id="qbar"></div>
-  <div class="controls" id="controls"></div>
-  <div id="feed"></div>
+  <div class="tabs">
+    <button class="tab active" id="tab-market" onclick="switchTab('market')">Market</button>
+    <button class="tab" id="tab-capitol" onclick="switchTab('capitol')">Capitol Trades</button>
+  </div>
+
+  <div id="view-market">
+    <div class="qbar" id="qbar"></div>
+    <div id="brief"></div>
+    <div class="section-label" id="alerts-label" style="display:none">Intraday Alerts</div>
+    <div class="controls" id="controls"></div>
+    <div id="feed"></div>
+  </div>
+
+  <div id="view-capitol" style="display:none">
+    <div id="capitol-feed"></div>
+  </div>
 </div>
 
 <script>
@@ -110,6 +165,7 @@ let HISTORY = [];
 let scanIndex = 0;
 
 async function load(){
+  await loadBrief();
   try{
     const res = await fetch('recommendations.json?t=' + Date.now());
     HISTORY = (await res.json()).history || [];
@@ -125,7 +181,33 @@ async function load(){
       '<div class="empty">No scans recorded yet.</div>';
     return;
   }
+  document.getElementById('alerts-label').style.display='block';
   buildControls(); render();
+}
+
+async function loadBrief(){
+  const wrap=document.getElementById('brief');
+  let hist=[];
+  try{
+    const res=await fetch('brief.json?t='+Date.now());
+    hist=(await res.json()).history||[];
+  }catch(e){ return; }
+  if(!hist.length){ return; }
+  const b=hist[0];
+  // Render **bold** markdown lightly; escape first.
+  let body=esc(b.brief||'').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+  wrap.innerHTML=`
+    <div class="brief-wrap">
+      <div class="brief-shadow"></div>
+      <div class="brief">
+        <div class="brief-head">
+          <span class="label">📰 Daily Brief</span>
+          <span class="date">${esc(b.date||'')}</span>
+        </div>
+        <div class="brief-body">${body}</div>
+        ${b.deep_look?`<span class="deep-tag">Deep look: ${esc(b.deep_look)}</span>`:''}
+      </div>
+    </div>`;
 }
 
 function buildControls(){
@@ -224,6 +306,54 @@ function esc(s){return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt
   function check(){const y=scrollY;shapes.forEach((s,i)=>{if(!s.t&&y>=s.threshold){shapes[i].t=true;setTimeout(()=>s.el.classList.add('visible'),s.delay);}});}
   check();addEventListener('scroll',check,{passive:true});
 })();
+
+function switchTab(which){
+  const m=which==='market';
+  document.getElementById('view-market').style.display=m?'block':'none';
+  document.getElementById('view-capitol').style.display=m?'none':'block';
+  document.getElementById('tab-market').classList.toggle('active',m);
+  document.getElementById('tab-capitol').classList.toggle('active',!m);
+  if(!m) loadCapitol();
+}
+
+let CAPITOL_LOADED=false;
+async function loadCapitol(){
+  if(CAPITOL_LOADED) return;
+  const feed=document.getElementById('capitol-feed');
+  let data;
+  try{
+    const res=await fetch('capitol.json?t='+Date.now());
+    data=await res.json();
+  }catch(e){
+    feed.innerHTML='<div class="empty">Capitol data not available yet.</div>';
+    return;
+  }
+  CAPITOL_LOADED=true;
+  const trades=data.trades||[];
+  if(!trades.length){
+    feed.innerHTML='<div class="empty">No disclosed trades yet. The nightly sync will populate this.</div>';
+    return;
+  }
+  const floor=data.alert_floor||0;
+  const floorTxt=`<div class="cap-floor">Showing all disclosed trades · Discord pings on $${floor.toLocaleString()}+ or spotlight names</div>`;
+  feed.innerHTML=floorTxt+trades.map(capRow).join('');
+}
+
+function capRow(t){
+  const isBuy=/BUY|PURCHASE/.test(t.type);
+  const cls=isBuy?'buy':'sell';
+  const label=isBuy?'BUY':'SELL';
+  const tk=t.ticker?esc(t.ticker):esc((t.asset||'').slice(0,16)||'—');
+  const px=t.price?` · $${Number(t.price).toFixed(2)}`:'';
+  return `
+    <div class="cap-row ${cls}">
+      <div class="cap-main">
+        <div class="cap-pol">${esc(t.politician)} <span style="font-weight:600;color:var(--text-dim);font-size:11px">${esc(t.chamber)}</span></div>
+        <div class="cap-sub">${esc(t.amount||'')} · traded ${esc(t.trade_date||'?')} · filed ${esc(t.filing_date||'?')}${px}</div>
+      </div>
+      <div class="cap-tk">${tk}<small class="${cls}">${label}</small></div>
+    </div>`;
+}
 
 load();
 setInterval(load, 5*60*1000);
