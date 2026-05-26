@@ -56,10 +56,11 @@ def parse_date(s: str):
     return None
 
 
-def fetch_feed(url: str, chamber: str, pages: int = 12) -> list[dict]:
-    """Fetch FMP 'latest' disclosures, paginated. FMP's free tier caps `limit`
-    at 25/page, so we page more times to keep similar total coverage. 12 pages
-    x 2 chambers = 24 requests/night, well under the 250/day free cap."""
+def fetch_feed(url: str, chamber: str, pages: int = 1) -> list[dict]:
+    """Fetch FMP 'latest' disclosures. FMP's free tier caps `limit` at 25 AND
+    only allows `page=0`, so we fetch a single page of 25 per chamber. That's
+    the newest ~25 disclosures — plenty given the nightly cadence and the
+    45-day filing lag. Deeper backfill would need a paid tier."""
     if not FMP_KEY:
         print(f"  FMP_API_KEY not set; cannot fetch {chamber}.", file=sys.stderr)
         return []
