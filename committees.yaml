@@ -1,0 +1,95 @@
+# ============================================================
+# Forkball Signals — COMMITTEE oversight map (committee-overlap detection)
+# ============================================================
+# Maps a politician (matched by LAST-NAME substring, like the spotlight list)
+# to the broad sectors their committee assignments give them oversight of.
+# When a newly-disclosed trade's ticker sector intersects this politician's
+# sectors, capitol.py flags it as a "committee overlap" and escalates the
+# Discord ping regardless of the dollar floor.
+#
+# WHY A STATIC FILE: committee assignments only change when a new Congress
+# seats (every 2 years) plus rare mid-term reshuffles. This is a once-a-year
+# touch-up, not a treadmill — and a hand-file keeps the feature FREE and
+# debuggable (no brittle scraper to babysit).
+#
+# SCOPE: you do NOT need all 535 members. The disclosure feed is dominated by
+# a few dozen frequent traders. Curate those; everyone else simply gets no
+# overlap flag (they still appear on the dashboard as normal trades).
+#
+# HONEST FRAMING: this detects committee/sector ADJACENCY, not proven conflict
+# of interest. A defense-committee member buying a defense name is suggestive,
+# not damning. Treat every flag as "worth a look," consistent with how this
+# whole tool treats Capitol data.
+#
+# MATCHING: last-name substring, case-insensitive. Occasionally over-broad if
+# two members share a surname — acceptable for a watch-tool. Use a fuller name
+# string (e.g. "Tommy Tuberville") to disambiguate if it ever bites.
+#
+# SECTORS must be drawn from sectors.yaml: Energy, Defense, Pharma, Tech, Finance.
+# To verify / refresh assignments, see the member's page on congress.gov.
+
+# --- format ---
+# politicians:
+#   "Last name or full name":
+#     sectors: [Energy, Defense, ...]
+#     note: "which committee drives this — for your own reference"
+
+politicians:
+  # ---- High-profile / frequent traders (seed set) ----
+  Pelosi:
+    sectors: [Tech, Finance]
+    note: "spouse trades heavily in big tech / financials; ex-Speaker, broad reach"
+
+  Tuberville:
+    sectors: [Defense, Finance]
+    note: "Senate Armed Services; Banking, Housing & Urban Affairs"
+
+  Crenshaw:
+    sectors: [Energy]
+    note: "House Energy & Commerce"
+
+  Khanna:
+    sectors: [Tech]
+    note: "House — represents Silicon Valley; Oversight"
+
+  Greene:
+    sectors: [Finance]
+    note: "House Oversight; active trader"
+
+  Gottheimer:
+    sectors: [Finance]
+    note: "House Financial Services"
+
+  McCaul:
+    sectors: [Defense, Tech]
+    note: "House Foreign Affairs; active large trader"
+
+  Whitehouse:
+    sectors: [Finance, Energy]
+    note: "Senate Budget; Environment & Public Works"
+
+  Carper:
+    sectors: [Energy, Finance]
+    note: "Senate Environment & Public Works; Finance"
+
+  Capito:
+    sectors: [Energy]
+    note: "Senate Environment & Public Works (energy/EPA oversight)"
+
+  Manchin:
+    sectors: [Energy]
+    note: "chaired Senate Energy & Natural Resources"
+
+  Wyden:
+    sectors: [Finance, Pharma]
+    note: "Senate Finance (tax, health programs)"
+
+  # ---- Your spotlight name from config.yaml ----
+  Olszewski:
+    sectors: []
+    note: "spotlight name — fill sectors once committee assignment confirmed on congress.gov"
+
+  # ---- Add more as you see them recur in the feed ----
+  # "Full Name":
+  #   sectors: [Sector, Sector]
+  #   note: "committee"
