@@ -28,6 +28,9 @@ import scan  # reuse load_config + fetch_quote
 ROOT = Path(__file__).parent
 OUT_PATH = ROOT / "docs" / "capitol.json"
 SEEN_PATH = ROOT / "docs" / "capitol_seen.json"
+SECTOR_CACHE_PATH = ROOT / "docs" / "capitol_sectors.json"  # ticker->sector cache
+COMMITTEES_PATH = ROOT / "committees.yaml"
+SECTORS_PATH = ROOT / "sectors.yaml"
 ET = ZoneInfo("America/New_York")
 
 # FMP "latest disclosures" feeds (new /stable/ format, free tier ~250 calls/day).
@@ -154,6 +157,104 @@ def trade_id(t: dict) -> str:
     return f"{t['politician']}:{t['ticker']}:{t['trade_date']}:{t['type']}:{t['amount_floor']}"
 
 
+# ---------------------------------------------------------------------------
+# Committee-overlap detection (the actual signal in this dataset)
+# ---------------------------------------------------------------------------
+# A trade is flagged when the politician sits on a committee overseeing the
+# sector of the ticker they traded. This is sector ADJACENCY, not proven
+# conflict — but it's the closest thing this 45-day-lagged data has to an edge,
+# so an overlap escalates to a Discord ping regardless of the dollar floor.
+
+def _load_yaml(path: Path) -> dict:
+    try:
+        import yaml
+        return yaml.safe_load(path.read_text()) or {}
+    except Exception as e:
+        print(f"  could not load {path.name}: {e}", file=sys.stderr)
+        return {}
+
+
+def load_overlap_config() -> dict:
+    """Load committees + sectors maps and the cached ticker->sector lookups.
+    Returns a single bundle the rest of the module reads from."""
+    committees = (_load_yaml(COMMITTEES_PATH).get("politicians") or {})
+    sec = _load_yaml(SECTORS_PATH)
+    cache = {}
+    if SECTOR_CACHE_PATH.exists():
+        try:
+            cache = json.loads(SECTOR_CACHE_PATH.read_text())
+        except Exception:
+            cache = {}
+    return {
+        "committees": committees,
+        "ticker_map": {k.upper(): v for k, v in (sec.get("ticker_map") or {}).items()},
+        "industry_keywords": sec.get("industry_keywords") or {},
+        "cache": cache,
+        "cache_dirty": False,
+    }
+
+
+def classify_sector(ticker: str, ov: dict) -> str | None:
+    """ticker -> broad sector. Stage 1: static map. Stage 2: cache. Stage 3:
+    one Finnhub profile call (then cached forever). Returns None if unknown."""
+    if not ticker:
+        return None
+    tk = ticker.upper()
+    # Stage 1: hand-seeded map (instant, free)
+    if tk in ov["ticker_map"]:
+        return ov["ticker_map"][tk]
+    # Stage 2: previously cached fallback result
+    if tk in ov["cache"]:
+        return ov["cache"][tk] or None
+    # Stage 3: Finnhub profile fallback — only for genuinely unknown tickers
+    sector = _finnhub_sector(tk, ov["industry_keywords"])
+    ov["cache"][tk] = sector or ""   # cache even misses so we don't re-call
+    ov["cache_dirty"] = True
+    return sector
+
+
+def _finnhub_sector(ticker: str, industry_keywords: dict) -> str | None:
+    """Look up Finnhub's finnhubIndustry and map it to one of our sectors."""
+    if not FINNHUB_KEY:
+        return None
+    try:
+        r = requests.get(
+            "https://finnhub.io/api/v1/stock/profile2",
+            params={"symbol": ticker, "token": FINNHUB_KEY}, timeout=10,
+        )
+        industry = (r.json() or {}).get("finnhubIndustry", "") or ""
+    except Exception as e:
+        print(f"  profile fetch failed for {ticker}: {e}", file=sys.stderr)
+        return None
+    low = industry.lower()
+    for sector, kws in industry_keywords.items():
+        if any(str(k).lower() in low for k in kws):
+            return sector
+    return None
+
+
+def politician_sectors(name: str, committees: dict) -> tuple[list, str]:
+    """Match a politician to their oversight sectors by last-name substring
+    (same loose match style as the spotlight list). Returns (sectors, note)."""
+    low = name.lower()
+    for key, info in committees.items():
+        if key.lower() in low:
+            return (info.get("sectors") or [], info.get("note", ""))
+    return ([], "")
+
+
+def detect_overlap(trade: dict, ov: dict) -> dict | None:
+    """If the trade's sector intersects the politician's committee sectors,
+    return an overlap dict; else None."""
+    pol_sectors, note = politician_sectors(trade["politician"], ov["committees"])
+    if not pol_sectors:
+        return None
+    sector = classify_sector(trade["ticker"], ov)
+    if sector and sector in pol_sectors:
+        return {"sector": sector, "committee_note": note}
+    return None
+
+
 def load_seen() -> set:
     if SEEN_PATH.exists():
         try:
@@ -174,8 +275,15 @@ def post_discord(trades: list[dict]):
         px = ""
         if t.get("price"):
             px = f" @ ${t['price']:.2f}"
-        return (f"{emoji} **{t['politician']}** ({t['chamber']}) — {t['type']} "
+        base = (f"{emoji} **{t['politician']}** ({t['chamber']}) — {t['type']} "
                 f"{tk}{px}\n   {t['amount']} · traded {t['trade_date']} · filed {t['filing_date']}")
+        ov = t.get("overlap")
+        if ov:
+            # The headline signal: surface the committee/sector adjacency loudly.
+            base = (f"\u26A0\uFE0F **COMMITTEE OVERLAP — {ov['sector']}**\n" + base
+                    + f"\n   \u21B3 oversees {ov['sector']}"
+                    + (f": {ov['committee_note']}" if ov.get("committee_note") else ""))
+        return base
     header = "\U0001F3DB\uFE0F **Newly disclosed Capitol trades**\n\n"
     buf = header
     for t in trades:
@@ -244,17 +352,36 @@ def main():
     print(f"  {len(trades)} recent, {len(new_trades)} new"
           + (" (FIRST RUN: seeding, no alerts)" if first_run else ""))
 
-    # Decide which NEW trades clear the alert bar (dollar floor or spotlight name).
+    # Committee-overlap detection runs over ALL recent trades so the dashboard
+    # badge shows even on small (sub-floor) trades — that's exactly where the
+    # interesting ones hide. Sector lookups are cached so this stays ~free.
+    overlap_on = cap.get("detect_committee_overlap", True)
+    ov = load_overlap_config() if overlap_on else None
+    n_overlap = 0
+    if overlap_on:
+        for t in trades:
+            hit = detect_overlap(t, ov)
+            if hit:
+                t["overlap"] = hit
+                n_overlap += 1
+        print(f"  {n_overlap} committee-overlap flag(s) across recent trades")
+
+    # Decide which NEW trades clear the alert bar. A committee overlap escalates
+    # the ping regardless of dollar floor (small in-jurisdiction trade > big
+    # index buy). Spotlight names and the dollar floor still apply as before.
     floor = cap.get("alert_min_amount", 50000)
     spotlight = [s.lower() for s in cap.get("spotlight_politicians", [])]
+    alert_overlap = overlap_on and cap.get("alert_on_overlap", True)
 
     def alertworthy(t):
+        if alert_overlap and t.get("overlap"):
+            return True
         if any(s in t["politician"].lower() for s in spotlight):
             return True
         return t["amount_floor"] >= floor
 
     to_alert = [t for t in new_trades if alertworthy(t)]
-    print(f"  {len(to_alert)} clear the alert bar (floor ${floor:,} or spotlight)")
+    print(f"  {len(to_alert)} clear the alert bar (floor ${floor:,}, spotlight, or overlap)")
 
     # Enrich alert-worthy trades with a current quote (cheap, only these).
     for t in to_alert:
@@ -278,6 +405,11 @@ def main():
     # Update seen set (cap growth).
     all_ids = list(seen | {trade_id(t) for t in trades})
     SEEN_PATH.write_text(json.dumps({"ids": all_ids[-5000:]}, indent=2))
+
+    # Persist the ticker->sector cache if we learned anything new this run.
+    if ov and ov.get("cache_dirty"):
+        SECTOR_CACHE_PATH.write_text(json.dumps(ov["cache"], indent=2, sort_keys=True))
+        print(f"  updated sector cache ({len(ov['cache'])} tickers)")
     print(f"  wrote dashboard ({len(trades)} trades) + seen state")
 
 
