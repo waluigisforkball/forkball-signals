@@ -56,17 +56,19 @@ def parse_date(s: str):
     return None
 
 
-def fetch_feed(url: str, chamber: str, pages: int = 3) -> list[dict]:
-    """Fetch FMP 'latest' disclosures, paginated. Free tier returns ~100/page;
-    a few pages covers recent activity comfortably."""
+def fetch_feed(url: str, chamber: str, pages: int = 12) -> list[dict]:
+    """Fetch FMP 'latest' disclosures, paginated. FMP's free tier caps `limit`
+    at 25/page, so we page more times to keep similar total coverage. 12 pages
+    x 2 chambers = 24 requests/night, well under the 250/day free cap."""
     if not FMP_KEY:
         print(f"  FMP_API_KEY not set; cannot fetch {chamber}.", file=sys.stderr)
         return []
+    PAGE_SIZE = 25  # free-tier max; FMP 402s on anything higher.
     out = []
     for page in range(pages):
         try:
             r = requests.get(url, timeout=30, params={
-                "page": page, "limit": 100, "apikey": FMP_KEY,
+                "page": page, "limit": PAGE_SIZE, "apikey": FMP_KEY,
             }, headers={"User-Agent": "forkball-signals"})
             # Surface non-200s explicitly — a 401/402/403 here means the key is
             # bad or the endpoint moved to a paid tier, which is the most likely
@@ -87,7 +89,7 @@ def fetch_feed(url: str, chamber: str, pages: int = 3) -> list[dict]:
             for it in data:
                 it["_chamber"] = chamber
             out += data
-            if len(data) < 100:
+            if len(data) < PAGE_SIZE:
                 break  # last page
         except Exception as e:
             print(f"  {chamber} feed fetch failed (page {page}): {e}", file=sys.stderr)
