@@ -35,7 +35,9 @@ jobs:
         run: |
           git config user.name  "forkball-bot"
           git config user.email "actions@github.com"
-          git add docs/capitol.json docs/capitol_seen.json
+          # Tolerate either file not existing yet (e.g. first run, or a feed
+          # outage that made the script early-return before writing them).
+          git add docs/capitol.json docs/capitol_seen.json || true
           if git diff --staged --quiet; then
             echo "No changes to commit."
           else
