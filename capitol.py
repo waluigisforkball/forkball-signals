@@ -68,9 +68,19 @@ def fetch_feed(url: str, chamber: str, pages: int = 3) -> list[dict]:
             r = requests.get(url, timeout=30, params={
                 "page": page, "limit": 100, "apikey": FMP_KEY,
             }, headers={"User-Agent": "forkball-signals"})
+            # Surface non-200s explicitly — a 401/402/403 here means the key is
+            # bad or the endpoint moved to a paid tier, which is the most likely
+            # reason this feed silently returns nothing.
+            if r.status_code != 200:
+                print(f"  {chamber} HTTP {r.status_code}: {r.text[:200]}",
+                      file=sys.stderr)
+                break
             data = r.json()
-            if isinstance(data, dict) and data.get("Error Message"):
-                print(f"  {chamber} FMP error: {data['Error Message']}", file=sys.stderr)
+            # FMP signals errors as a dict with various keys depending on the
+            # failure; log whatever it sent rather than guessing the key.
+            if isinstance(data, dict):
+                print(f"  {chamber} FMP returned an error object: "
+                      f"{json.dumps(data)[:200]}", file=sys.stderr)
                 break
             if not isinstance(data, list) or not data:
                 break
@@ -194,7 +204,18 @@ def main():
     print(f"Fetched {len(raw)} raw disclosures")
 
     if not raw:
-        print("  no data (feed down or FMP_API_KEY missing); leaving state untouched.")
+        print("  no data (feed down, key bad, or endpoint now paid). "
+              "Preserving prior dashboard; ensuring state files exist.")
+        # Make sure both committed files exist so the workflow's `git add`
+        # never fails on a missing pathspec. Preserve whatever was there.
+        if not OUT_PATH.exists():
+            OUT_PATH.write_text(json.dumps({
+                "generated_at": now_et.isoformat(),
+                "alert_floor": cap.get("alert_min_amount", 50000),
+                "trades": [],
+            }, indent=2))
+        if not SEEN_PATH.exists():
+            SEEN_PATH.write_text(json.dumps({"ids": []}, indent=2))
         return
 
     # Normalize + keep only recently FILED disclosures (FMP gives a real filing
