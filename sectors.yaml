@@ -1,0 +1,119 @@
+# ============================================================
+# Forkball Signals — SECTOR definitions (committee-overlap detection)
+# ============================================================
+# Used by capitol.py to classify a traded ticker into a broad sector, then
+# check whether that sector overlaps the trading politician's committee
+# oversight (see committees.yaml).
+#
+# Two-stage classification per ticker:
+#   1. ticker_map below — instant, free, covers the names that actually recur
+#      in disclosure feeds. Add to this whenever you see a frequent ticker
+#      land in the wrong/blank sector.
+#   2. Finnhub /stock/profile2 fallback — only fires for tickers NOT in the map,
+#      then the result is cached to docs/capitol_sectors.json forever. Maps
+#      Finnhub's free-text "finnhubIndustry" to our sectors via industry_keywords.
+#
+# Sectors are intentionally BROAD (Mike's call): Energy, Defense, Pharma,
+# Tech, Finance. Coarse buckets = fewer false "no match" gaps, and the flag is
+# only ever "interesting to watch," not proof of anything.
+
+# --- Broad sectors we care about ---
+sectors:
+  - Energy
+  - Defense
+  - Pharma
+  - Tech
+  - Finance
+
+# --- Stage 2 fallback: map Finnhub's finnhubIndustry text -> our sector ---
+# Matched case-insensitively as substrings against the profile's industry field.
+# First sector with a matching keyword wins (order matters: more specific first).
+industry_keywords:
+  Defense:
+    - aerospace
+    - defense
+  Energy:
+    - oil
+    - gas
+    - energy
+    - petroleum
+    - coal
+    - utilities
+    - renewable
+    - solar
+  Pharma:
+    - pharmaceutical
+    - biotechnology
+    - life sciences
+    - health care
+    - healthcare
+    - medical
+  Finance:
+    - bank
+    - financial
+    - insurance
+    - capital markets
+    - asset management
+  Tech:
+    - technology
+    - software
+    - semiconductor
+    - hardware
+    - internet
+    - communications
+
+# --- Stage 1: direct ticker -> sector (fast path, no API call) ---
+# Seeded with common large-caps that show up in disclosures. Extend freely.
+ticker_map:
+  # Energy
+  XOM: Energy
+  CVX: Energy
+  COP: Energy
+  OXY: Energy
+  SLB: Energy
+  USO: Energy
+  NEE: Energy
+  ENPH: Energy
+  FSLR: Energy
+  # Defense
+  LMT: Defense
+  RTX: Defense
+  NOC: Defense
+  GD: Defense
+  BA: Defense
+  LDOS: Defense
+  HII: Defense
+  # Pharma / health
+  PFE: Pharma
+  MRK: Pharma
+  JNJ: Pharma
+  ABBV: Pharma
+  LLY: Pharma
+  UNH: Pharma
+  MRNA: Pharma
+  GILD: Pharma
+  # Tech
+  AAPL: Tech
+  MSFT: Tech
+  NVDA: Tech
+  GOOGL: Tech
+  GOOG: Tech
+  META: Tech
+  AMZN: Tech
+  AMD: Tech
+  CRM: Tech
+  ADBE: Tech
+  ORCL: Tech
+  PLTR: Tech
+  AVGO: Tech
+  # Finance
+  JPM: Finance
+  BAC: Finance
+  GS: Finance
+  MS: Finance
+  WFC: Finance
+  C: Finance
+  BLK: Finance
+  V: Finance
+  MA: Finance
+  AXP: Finance
