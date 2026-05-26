@@ -243,13 +243,12 @@ def politician_sectors(name: str, committees: dict) -> tuple[list, str]:
     return ([], "")
 
 
-def detect_overlap(trade: dict, ov: dict) -> dict | None:
-    """If the trade's sector intersects the politician's committee sectors,
-    return an overlap dict; else None."""
+def detect_overlap(trade: dict, ov: dict, sector: str | None) -> dict | None:
+    """If the trade's (precomputed) sector intersects the politician's committee
+    sectors, return an overlap dict; else None."""
     pol_sectors, note = politician_sectors(trade["politician"], ov["committees"])
     if not pol_sectors:
         return None
-    sector = classify_sector(trade["ticker"], ov)
     if sector and sector in pol_sectors:
         return {"sector": sector, "committee_note": note}
     return None
@@ -352,15 +351,18 @@ def main():
     print(f"  {len(trades)} recent, {len(new_trades)} new"
           + (" (FIRST RUN: seeding, no alerts)" if first_run else ""))
 
-    # Committee-overlap detection runs over ALL recent trades so the dashboard
-    # badge shows even on small (sub-floor) trades — that's exactly where the
-    # interesting ones hide. Sector lookups are cached so this stays ~free.
+    # Classify EVERY trade's sector (cheap: static map first, cached Finnhub
+    # fallback for unknowns) so the dashboard can chart sector activity across
+    # all trades — not just committee members'. Then flag committee overlaps.
     overlap_on = cap.get("detect_committee_overlap", True)
     ov = load_overlap_config() if overlap_on else None
     n_overlap = 0
     if overlap_on:
         for t in trades:
-            hit = detect_overlap(t, ov)
+            sector = classify_sector(t["ticker"], ov)
+            if sector:
+                t["sector"] = sector
+            hit = detect_overlap(t, ov, sector)
             if hit:
                 t["overlap"] = hit
                 n_overlap += 1
