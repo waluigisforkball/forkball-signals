@@ -130,6 +130,11 @@ body{
 .cap-tk small.buy{color:var(--bull,#00a86b);} .cap-tk small.sell{color:var(--bear,#e8234a);}
 .cap-amt{font-size:11px;color:var(--text-dim);white-space:nowrap;text-align:right;}
 .cap-floor{font-size:11px;color:var(--text-dim);margin-bottom:12px;font-weight:700;}
+.cap-row.flagged{border-left-color:var(--catalyst);background:var(--catalyst-light);}
+.cap-flag{display:inline-block;margin-top:5px;font-size:10px;font-weight:800;
+  padding:3px 8px;border-radius:7px;background:var(--catalyst);color:#fff;
+  text-transform:uppercase;letter-spacing:.5px;}
+.cap-flag-note{font-size:11px;color:var(--catalyst);font-weight:700;margin-top:3px;}
 </style>
 </head>
 <body>
@@ -335,7 +340,7 @@ async function loadCapitol(){
     return;
   }
   const floor=data.alert_floor||0;
-  const floorTxt=`<div class="cap-floor">Showing all disclosed trades · Discord pings on $${floor.toLocaleString()}+ or spotlight names</div>`;
+  const floorTxt=`<div class="cap-floor">Showing all disclosed trades · Discord pings on $${floor.toLocaleString()}+, spotlight names, or ⚠ committee overlaps</div>`;
   feed.innerHTML=floorTxt+trades.map(capRow).join('');
 }
 
@@ -345,11 +350,15 @@ function capRow(t){
   const label=isBuy?'BUY':'SELL';
   const tk=t.ticker?esc(t.ticker):esc((t.asset||'').slice(0,16)||'—');
   const px=t.price?` · $${Number(t.price).toFixed(2)}`:'';
+  const ov=t.overlap;
+  const flag=ov?`<div><span class="cap-flag">⚠ ${esc(ov.sector)} overlap</span></div>`
+    +(ov.committee_note?`<div class="cap-flag-note">↳ ${esc(ov.committee_note)}</div>`:''):'';
   return `
-    <div class="cap-row ${cls}">
+    <div class="cap-row ${cls}${ov?' flagged':''}">
       <div class="cap-main">
         <div class="cap-pol">${esc(t.politician)} <span style="font-weight:600;color:var(--text-dim);font-size:11px">${esc(t.chamber)}</span></div>
         <div class="cap-sub">${esc(t.amount||'')} · traded ${esc(t.trade_date||'?')} · filed ${esc(t.filing_date||'?')}${px}</div>
+        ${flag}
       </div>
       <div class="cap-tk">${tk}<small class="${cls}">${label}</small></div>
     </div>`;
