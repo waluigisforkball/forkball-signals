@@ -7,6 +7,11 @@ JSON feeds (no API key). Detects newly-disclosed trades since the last run,
 shows ALL of them on the dashboard, and pings Discord only for trades clearing a
 dollar floor (or matching a spotlight name) so the channel stays signal-only.
 
+Pattern detection: tracks per-politician trade history in capitol_seen.json and
+fires a separate Discord ping the first time a politician makes repeated same-
+direction bets on the same ticker within a rolling window. Pattern cards also
+appear at the top of the Capitol tab on the dashboard.
+
 Data note: STOCK Act filings can lag up to 45 days after the actual trade. This
 tracks what was *newly disclosed*, not real-time activity. No tracker can be
 real-time — that's the law, not a limitation here.
@@ -20,6 +25,7 @@ import json
 import datetime as dt
 from zoneinfo import ZoneInfo
 from pathlib import Path
+from collections import defaultdict
 
 import requests
 
@@ -28,27 +34,22 @@ import scan  # reuse load_config + fetch_quote
 ROOT = Path(__file__).parent
 OUT_PATH = ROOT / "docs" / "capitol.json"
 SEEN_PATH = ROOT / "docs" / "capitol_seen.json"
-SECTOR_CACHE_PATH = ROOT / "docs" / "capitol_sectors.json"  # ticker->sector cache
-COMMITTEES_PATH = ROOT / "committees.yaml"
-SECTORS_PATH = ROOT / "sectors.yaml"
 ET = ZoneInfo("America/New_York")
 
-# FMP "latest disclosures" feeds (new /stable/ format, free tier ~250 calls/day).
-# These return the newest disclosures across ALL members, paginated — exactly what
-# a tracker wants. Field names handled defensively in normalize() since FMP returns
-# camelCase and occasionally varies. Needs a free key: FMP_API_KEY (GitHub secret).
 FMP_BASE = "https://financialmodelingprep.com/stable"
 FMP_KEY = os.environ.get("FMP_API_KEY", "")
 SENATE_URL = f"{FMP_BASE}/senate-latest"
 HOUSE_URL = f"{FMP_BASE}/house-latest"
 
-# Separate webhook if you made a #capitol-trades channel; else falls back.
 CAPITOL_WEBHOOK = os.environ.get("CAPITOL_WEBHOOK") or os.environ.get("DISCORD_WEBHOOK", "")
 FINNHUB_KEY = os.environ.get("FINNHUB_KEY", "")
 
+# Pattern detection settings
+PATTERN_WINDOW_DAYS = 60   # rolling window for repeat-bet detection
+PATTERN_MIN_TRADES = 2     # how many same-direction trades = a pattern
+
 
 def parse_date(s: str):
-    """Disclosure dates are MM/DD/YYYY. Return a date or None."""
     if not s:
         return None
     for fmt in ("%m/%d/%Y", "%Y-%m-%d", "%m/%d/%y"):
@@ -59,42 +60,27 @@ def parse_date(s: str):
     return None
 
 
-def fetch_feed(url: str, chamber: str, pages: int = 1) -> list[dict]:
-    """Fetch FMP 'latest' disclosures. FMP's free tier caps `limit` at 25 AND
-    only allows `page=0`, so we fetch a single page of 25 per chamber. That's
-    the newest ~25 disclosures — plenty given the nightly cadence and the
-    45-day filing lag. Deeper backfill would need a paid tier."""
+def fetch_feed(url: str, chamber: str, pages: int = 3) -> list[dict]:
     if not FMP_KEY:
         print(f"  FMP_API_KEY not set; cannot fetch {chamber}.", file=sys.stderr)
         return []
-    PAGE_SIZE = 25  # free-tier max; FMP 402s on anything higher.
     out = []
     for page in range(pages):
         try:
             r = requests.get(url, timeout=30, params={
-                "page": page, "limit": PAGE_SIZE, "apikey": FMP_KEY,
+                "page": page, "limit": 100, "apikey": FMP_KEY,
             }, headers={"User-Agent": "forkball-signals"})
-            # Surface non-200s explicitly — a 401/402/403 here means the key is
-            # bad or the endpoint moved to a paid tier, which is the most likely
-            # reason this feed silently returns nothing.
-            if r.status_code != 200:
-                print(f"  {chamber} HTTP {r.status_code}: {r.text[:200]}",
-                      file=sys.stderr)
-                break
             data = r.json()
-            # FMP signals errors as a dict with various keys depending on the
-            # failure; log whatever it sent rather than guessing the key.
-            if isinstance(data, dict):
-                print(f"  {chamber} FMP returned an error object: "
-                      f"{json.dumps(data)[:200]}", file=sys.stderr)
+            if isinstance(data, dict) and data.get("Error Message"):
+                print(f"  {chamber} FMP error: {data['Error Message']}", file=sys.stderr)
                 break
             if not isinstance(data, list) or not data:
                 break
             for it in data:
                 it["_chamber"] = chamber
             out += data
-            if len(data) < PAGE_SIZE:
-                break  # last page
+            if len(data) < 100:
+                break
         except Exception as e:
             print(f"  {chamber} feed fetch failed (page {page}): {e}", file=sys.stderr)
             break
@@ -102,7 +88,6 @@ def fetch_feed(url: str, chamber: str, pages: int = 1) -> list[dict]:
 
 
 def g(d: dict, *keys, default=""):
-    """Grab the first present key — field names differ across the two feeds."""
     for k in keys:
         if d.get(k) not in (None, "", "--"):
             return d[k]
@@ -110,9 +95,6 @@ def g(d: dict, *keys, default=""):
 
 
 def parse_amount_floor(amount_str: str) -> int:
-    """Disclosures give a range like '$1,001 - $15,000'. Return the LOW end as int.
-    Strip commas first so each dollar figure stays a whole number, then take the
-    smallest figure found (the bottom of the range)."""
     if not amount_str:
         return 0
     cleaned = str(amount_str).replace(",", "")
@@ -129,7 +111,6 @@ def parse_amount_floor(amount_str: str) -> int:
 
 
 def normalize(raw: dict) -> dict:
-    # FMP returns camelCase; names may be split into first/last or combined.
     name = g(raw, "office", "representative", "senator", "name", "Name")
     if not name:
         first = g(raw, "firstName", "first_name")
@@ -157,132 +138,93 @@ def trade_id(t: dict) -> str:
     return f"{t['politician']}:{t['ticker']}:{t['trade_date']}:{t['type']}:{t['amount_floor']}"
 
 
-# ---------------------------------------------------------------------------
-# Committee-overlap detection (the actual signal in this dataset)
-# ---------------------------------------------------------------------------
-# A trade is flagged when the politician sits on a committee overseeing the
-# sector of the ticker they traded. This is sector ADJACENCY, not proven
-# conflict — but it's the closest thing this 45-day-lagged data has to an edge,
-# so an overlap escalates to a Discord ping regardless of the dollar floor.
+def is_buy(t: dict) -> bool:
+    return bool(t.get("ticker")) and ("BUY" in t["type"] or "PURCHASE" in t["type"])
 
-def _load_yaml(path: Path) -> dict:
-    try:
-        import yaml
-        return yaml.safe_load(path.read_text()) or {}
-    except Exception as e:
-        print(f"  could not load {path.name}: {e}", file=sys.stderr)
-        return {}
+def is_sell(t: dict) -> bool:
+    return bool(t.get("ticker")) and ("SELL" in t["type"] or "SALE" in t["type"])
 
-
-def load_overlap_config() -> dict:
-    """Load committees + sectors maps and the cached ticker->sector lookups.
-    Returns a single bundle the rest of the module reads from."""
-    committees = (_load_yaml(COMMITTEES_PATH).get("politicians") or {})
-    sec = _load_yaml(SECTORS_PATH)
-    cache = {}
-    if SECTOR_CACHE_PATH.exists():
-        try:
-            cache = json.loads(SECTOR_CACHE_PATH.read_text())
-        except Exception:
-            cache = {}
-    return {
-        "committees": committees,
-        "ticker_map": {k.upper(): v for k, v in (sec.get("ticker_map") or {}).items()},
-        "industry_keywords": sec.get("industry_keywords") or {},
-        "cache": cache,
-        "cache_dirty": False,
-    }
-
-
-def classify_sector(ticker: str, ov: dict) -> str | None:
-    """ticker -> broad sector. Stage 1: static map. Stage 2: cache. Stage 3:
-    one Finnhub profile call (then cached forever). Returns None if unknown."""
-    if not ticker:
-        return None
-    tk = ticker.upper()
-    # Stage 1: hand-seeded map (instant, free)
-    if tk in ov["ticker_map"]:
-        return ov["ticker_map"][tk]
-    # Stage 2: previously cached fallback result
-    if tk in ov["cache"]:
-        return ov["cache"][tk] or None
-    # Stage 3: Finnhub profile fallback — only for genuinely unknown tickers
-    sector = _finnhub_sector(tk, ov["industry_keywords"])
-    ov["cache"][tk] = sector or ""   # cache even misses so we don't re-call
-    ov["cache_dirty"] = True
-    return sector
-
-
-def _finnhub_sector(ticker: str, industry_keywords: dict) -> str | None:
-    """Look up Finnhub's finnhubIndustry and map it to one of our sectors."""
-    if not FINNHUB_KEY:
-        return None
-    try:
-        r = requests.get(
-            "https://finnhub.io/api/v1/stock/profile2",
-            params={"symbol": ticker, "token": FINNHUB_KEY}, timeout=10,
-        )
-        industry = (r.json() or {}).get("finnhubIndustry", "") or ""
-    except Exception as e:
-        print(f"  profile fetch failed for {ticker}: {e}", file=sys.stderr)
-        return None
-    low = industry.lower()
-    for sector, kws in industry_keywords.items():
-        if any(str(k).lower() in low for k in kws):
-            return sector
+def trade_direction(t: dict) -> str | None:
+    if is_buy(t): return "BUY"
+    if is_sell(t): return "SELL"
     return None
 
 
-def politician_sectors(name: str, committees: dict) -> tuple[list, str]:
-    """Match a politician to their oversight sectors by last-name substring
-    (same loose match style as the spotlight list). Returns (sectors, note)."""
-    low = name.lower()
-    for key, info in committees.items():
-        if key.lower() in low:
-            return (info.get("sectors") or [], info.get("note", ""))
-    return ([], "")
-
-
-def detect_overlap(trade: dict, ov: dict, sector: str | None) -> dict | None:
-    """If the trade's (precomputed) sector intersects the politician's committee
-    sectors, return an overlap dict; else None."""
-    pol_sectors, note = politician_sectors(trade["politician"], ov["committees"])
-    if not pol_sectors:
-        return None
-    if sector and sector in pol_sectors:
-        return {"sector": sector, "committee_note": note}
-    return None
-
-
-def load_seen() -> set:
+def load_seen() -> dict:
+    """Returns full seen state: {ids: [...], patterns_alerted: [...], trade_history: {...}}"""
     if SEEN_PATH.exists():
         try:
-            return set(json.loads(SEEN_PATH.read_text()).get("ids", []))
+            return json.loads(SEEN_PATH.read_text())
         except Exception:
-            return set()
-    return set()
+            return {}
+    return {}
 
 
-def post_discord(trades: list[dict]):
+def detect_patterns(all_trades: list[dict], now: dt.date) -> list[dict]:
+    """
+    Scan all_trades for politicians who have made 2+ same-direction trades
+    on the same ticker within PATTERN_WINDOW_DAYS. Returns a list of pattern dicts.
+    Only includes trades with a real ticker and a parseable trade_date.
+    """
+    cutoff = now - dt.timedelta(days=PATTERN_WINDOW_DAYS)
+
+    # Group by (politician, ticker, direction)
+    groups = defaultdict(list)
+    for t in all_trades:
+        direction = trade_direction(t)
+        if not direction or not t.get("ticker"):
+            continue
+        d = parse_date(t["trade_date"])
+        if not d or d < cutoff:
+            continue
+        key = (t["politician"], t["ticker"], direction)
+        groups[key].append(t)
+
+    patterns = []
+    for (pol, ticker, direction), trades in groups.items():
+        if len(trades) < PATTERN_MIN_TRADES:
+            continue
+        trades_sorted = sorted(trades, key=lambda x: parse_date(x["trade_date"]) or dt.date.min)
+        first_date = trades_sorted[0]["trade_date"]
+        last_date = trades_sorted[-1]["trade_date"]
+        span_days = (
+            (parse_date(last_date) - parse_date(first_date)).days
+            if parse_date(last_date) and parse_date(first_date) else 0
+        )
+        total_floor = sum(t["amount_floor"] for t in trades)
+        chamber = trades_sorted[-1].get("chamber", "")
+        patterns.append({
+            "politician": pol,
+            "chamber": chamber,
+            "ticker": ticker,
+            "direction": direction,
+            "trade_count": len(trades),
+            "first_trade": first_date,
+            "last_trade": last_date,
+            "span_days": span_days,
+            "total_amount_floor": total_floor,
+            "amounts": [t["amount"] for t in trades_sorted],
+        })
+
+    # Sort: most trades first, then by recency of last trade
+    patterns.sort(key=lambda p: (-p["trade_count"], p["last_trade"]), reverse=False)
+    patterns.sort(key=lambda p: p["trade_count"], reverse=True)
+    return patterns
+
+
+def pattern_id(p: dict) -> str:
+    return f"pattern:{p['politician']}:{p['ticker']}:{p['direction']}:{p['trade_count']}"
+
+
+def post_discord_trades(trades: list[dict]):
     if not CAPITOL_WEBHOOK or not trades:
         return
-    # Batch into messages under Discord's 2000-char cap.
     def line(t):
-        emoji = "\U0001F7E2" if "BUY" in t["type"] or "PURCHASE" in t["type"] else \
-                ("\U0001F534" if "S" in t["type"] else "\u26AA")
+        emoji = "\U0001F7E2" if is_buy(t) else ("\U0001F534" if is_sell(t) else "\u26AA")
         tk = f"${t['ticker']}" if t["ticker"] else (t["asset"][:30] or "—")
-        px = ""
-        if t.get("price"):
-            px = f" @ ${t['price']:.2f}"
-        base = (f"{emoji} **{t['politician']}** ({t['chamber']}) — {t['type']} "
+        px = f" @ ${t['price']:.2f}" if t.get("price") else ""
+        return (f"{emoji} **{t['politician']}** ({t['chamber']}) — {t['type']} "
                 f"{tk}{px}\n   {t['amount']} · traded {t['trade_date']} · filed {t['filing_date']}")
-        ov = t.get("overlap")
-        if ov:
-            # The headline signal: surface the committee/sector adjacency loudly.
-            base = (f"\u26A0\uFE0F **COMMITTEE OVERLAP — {ov['sector']}**\n" + base
-                    + f"\n   \u21B3 oversees {ov['sector']}"
-                    + (f": {ov['committee_note']}" if ov.get("committee_note") else ""))
-        return base
     header = "\U0001F3DB\uFE0F **Newly disclosed Capitol trades**\n\n"
     buf = header
     for t in trades:
@@ -301,10 +243,34 @@ def post_discord(trades: list[dict]):
             print(f"  discord post failed: {e}", file=sys.stderr)
 
 
+def post_discord_patterns(new_patterns: list[dict]):
+    """Fire one Discord message per new pattern detected."""
+    if not CAPITOL_WEBHOOK or not new_patterns:
+        return
+    for p in new_patterns:
+        emoji = "\U0001F501"  # 🔁
+        dir_emoji = "\U0001F7E2" if p["direction"] == "BUY" else "\U0001F534"
+        amounts_str = " → ".join(p["amounts"])
+        content = (
+            f"{emoji} **Pattern Alert** — {p['politician']} ({p['chamber']})\n"
+            f"{dir_emoji} **{p['trade_count']}x {p['direction']}** on **${p['ticker']}** "
+            f"over {p['span_days']} days\n"
+            f"Amounts: {amounts_str}\n"
+            f"First: {p['first_trade']} · Last: {p['last_trade']}\n"
+            f"_(45-day filing lag applies — trades may have occurred earlier)_"
+        )
+        try:
+            requests.post(CAPITOL_WEBHOOK, json={"content": content}, timeout=10)
+            print(f"  pattern alert sent: {p['politician']} {p['direction']} {p['ticker']} x{p['trade_count']}")
+        except Exception as e:
+            print(f"  pattern discord post failed: {e}", file=sys.stderr)
+
+
 def main():
     config = scan.load_config()
     cap = config.get("capitol", {})
     now_et = dt.datetime.now(ET)
+    today = now_et.date()
 
     raw = []
     if cap.get("track_house", True):
@@ -314,24 +280,11 @@ def main():
     print(f"Fetched {len(raw)} raw disclosures")
 
     if not raw:
-        print("  no data (feed down, key bad, or endpoint now paid). "
-              "Preserving prior dashboard; ensuring state files exist.")
-        # Make sure both committed files exist so the workflow's `git add`
-        # never fails on a missing pathspec. Preserve whatever was there.
-        if not OUT_PATH.exists():
-            OUT_PATH.write_text(json.dumps({
-                "generated_at": now_et.isoformat(),
-                "alert_floor": cap.get("alert_min_amount", 50000),
-                "trades": [],
-            }, indent=2))
-        if not SEEN_PATH.exists():
-            SEEN_PATH.write_text(json.dumps({"ids": []}, indent=2))
+        print("  no data (feed down or FMP_API_KEY missing); leaving state untouched.")
         return
 
-    # Normalize + keep only recently FILED disclosures (FMP gives a real filing
-    # date). Fall back to transaction date if filing date is absent.
     lookback = cap.get("lookback_days", 14)
-    cutoff = now_et.date() - dt.timedelta(days=lookback)
+    cutoff = today - dt.timedelta(days=lookback)
     trades = []
     for r in raw:
         t = normalize(r)
@@ -342,58 +295,61 @@ def main():
             continue
         trades.append(t)
 
-    # New = not in the seen-set. On the very FIRST run the seen-set is empty, so
-    # everything would look "new" — guard against alert-flooding by treating the
-    # first run as seed-only (populate seen, don't alert).
-    seen = load_seen()
+    seen_state = load_seen()
+    seen_ids = set(seen_state.get("ids", []))
+    patterns_alerted = set(seen_state.get("patterns_alerted", []))
     first_run = not SEEN_PATH.exists()
-    new_trades = [] if first_run else [t for t in trades if trade_id(t) not in seen]
+
+    new_trades = [] if first_run else [t for t in trades if trade_id(t) not in seen_ids]
     print(f"  {len(trades)} recent, {len(new_trades)} new"
           + (" (FIRST RUN: seeding, no alerts)" if first_run else ""))
 
-    # Classify EVERY trade's sector (cheap: static map first, cached Finnhub
-    # fallback for unknowns) so the dashboard can chart sector activity across
-    # all trades — not just committee members'. Then flag committee overlaps.
-    overlap_on = cap.get("detect_committee_overlap", True)
-    ov = load_overlap_config() if overlap_on else None
-    n_overlap = 0
-    if overlap_on:
-        for t in trades:
-            sector = classify_sector(t["ticker"], ov)
-            if sector:
-                t["sector"] = sector
-            hit = detect_overlap(t, ov, sector)
-            if hit:
-                t["overlap"] = hit
-                n_overlap += 1
-        print(f"  {n_overlap} committee-overlap flag(s) across recent trades")
-
-    # Decide which NEW trades clear the alert bar. A committee overlap escalates
-    # the ping regardless of dollar floor (small in-jurisdiction trade > big
-    # index buy). Spotlight names and the dollar floor still apply as before.
     floor = cap.get("alert_min_amount", 50000)
     spotlight = [s.lower() for s in cap.get("spotlight_politicians", [])]
-    alert_overlap = overlap_on and cap.get("alert_on_overlap", True)
 
     def alertworthy(t):
-        if alert_overlap and t.get("overlap"):
-            return True
         if any(s in t["politician"].lower() for s in spotlight):
             return True
         return t["amount_floor"] >= floor
 
     to_alert = [t for t in new_trades if alertworthy(t)]
-    print(f"  {len(to_alert)} clear the alert bar (floor ${floor:,}, spotlight, or overlap)")
+    print(f"  {len(to_alert)} clear the alert bar (floor ${floor:,} or spotlight)")
 
-    # Enrich alert-worthy trades with a current quote (cheap, only these).
     for t in to_alert:
         if t["ticker"]:
             q = scan.fetch_quote(t["ticker"])
             t["price"] = q["price"] if q else None
 
-    post_discord(to_alert)
+    post_discord_trades(to_alert)
 
-    # Dashboard shows ALL recent trades (the full firehose), newest first.
+    # --- Pattern detection ---
+    # Use a broader window of trades for pattern analysis: combine current batch
+    # with any previously stored trades from capitol.json for richer history.
+    all_trades_for_patterns = list(trades)
+    if OUT_PATH.exists():
+        try:
+            old_data = json.loads(OUT_PATH.read_text())
+            old_trades = old_data.get("trades", [])
+            # Merge, dedup by trade_id
+            existing_ids = {trade_id(t) for t in all_trades_for_patterns}
+            for ot in old_trades:
+                if trade_id(ot) not in existing_ids:
+                    all_trades_for_patterns.append(ot)
+        except Exception:
+            pass
+
+    patterns = detect_patterns(all_trades_for_patterns, today)
+    print(f"  {len(patterns)} pattern(s) detected across {PATTERN_WINDOW_DAYS}-day window")
+
+    # Only alert on patterns we haven't pinged before, and skip on first run
+    new_patterns = [] if first_run else [
+        p for p in patterns if pattern_id(p) not in patterns_alerted
+    ]
+    if new_patterns:
+        print(f"  {len(new_patterns)} new pattern(s) to alert")
+        post_discord_patterns(new_patterns)
+
+    # Dashboard: sort trades newest first
     def sort_key(t):
         return parse_date(t["trade_date"]) or dt.date.min
     trades.sort(key=sort_key, reverse=True)
@@ -401,18 +357,18 @@ def main():
     OUT_PATH.write_text(json.dumps({
         "generated_at": now_et.isoformat(),
         "alert_floor": floor,
+        "patterns": patterns,
         "trades": trades[:300],
     }, indent=2, default=str))
 
-    # Update seen set (cap growth).
-    all_ids = list(seen | {trade_id(t) for t in trades})
-    SEEN_PATH.write_text(json.dumps({"ids": all_ids[-5000:]}, indent=2))
-
-    # Persist the ticker->sector cache if we learned anything new this run.
-    if ov and ov.get("cache_dirty"):
-        SECTOR_CACHE_PATH.write_text(json.dumps(ov["cache"], indent=2, sort_keys=True))
-        print(f"  updated sector cache ({len(ov['cache'])} tickers)")
-    print(f"  wrote dashboard ({len(trades)} trades) + seen state")
+    # Update seen state
+    all_ids = list(seen_ids | {trade_id(t) for t in trades})
+    all_patterns_alerted = list(patterns_alerted | {pattern_id(p) for p in new_patterns})
+    SEEN_PATH.write_text(json.dumps({
+        "ids": all_ids[-5000:],
+        "patterns_alerted": all_patterns_alerted[-500:],
+    }, indent=2))
+    print(f"  wrote dashboard ({len(trades)} trades, {len(patterns)} patterns) + seen state")
 
 
 if __name__ == "__main__":
