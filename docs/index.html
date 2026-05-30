@@ -15,6 +15,9 @@
   --move:#1a6ef5; --move-light:#dce9ff;
   --catalyst:#f5620a; --catalyst-light:#ffe0d0;
   --level:#8b1af5; --level-light:#eddcff;
+  --bull:#00a86b; --bull-light:#d4f5e9;
+  --bear:#e8234a; --bear-light:#ffdde3;
+  --pattern:#f5a623; --pattern-light:#fff3d6;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{
@@ -41,7 +44,7 @@ body{
 .qbar{display:flex;gap:8px;overflow-x:auto;padding:2px 0 14px;}
 .quote{flex:0 0 auto;background:var(--surface);border:2px solid var(--border);
   border-radius:11px;padding:6px 11px;font-size:12px;font-weight:800;white-space:nowrap;}
-.quote .up{color:#00a86b;} .quote .down{color:#e8234a;}
+.quote .up{color:var(--bull);} .quote .down{color:var(--bear);}
 
 .controls{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
 .btn{border-radius:11px;font-family:'Nunito Sans',sans-serif;font-weight:800;
@@ -85,7 +88,7 @@ body{
 .copy{margin-top:8px;width:100%;border-radius:11px;border:2px solid var(--accent);
   background:var(--accent);color:#063d39;font-family:'Nunito Sans',sans-serif;
   font-weight:800;font-size:14px;padding:9px;cursor:pointer;}
-.copy.done{background:#00a86b;border-color:#00a86b;color:#fff;}
+.copy.done{background:var(--bull);border-color:var(--bull);color:#fff;}
 
 .empty{text-align:center;color:var(--text-muted);padding:40px 20px;font-size:15px;}
 
@@ -115,80 +118,54 @@ body{
   letter-spacing:.5px;}
 .tab.active{background:var(--accent);border-color:var(--accent);color:#063d39;}
 
+/* ── Capitol tab ── */
+.cap-filter{display:flex;gap:8px;margin-bottom:14px;}
+.cap-filter input{
+  flex:1;border-radius:11px;border:2px solid var(--border-dark);
+  background:var(--surface);color:var(--text);padding:8px 12px;
+  font-family:'Nunito Sans',sans-serif;font-weight:700;font-size:13px;
+  outline:none;}
+.cap-filter input:focus{border-color:var(--accent);}
+.cap-filter input::placeholder{color:var(--text-dim);}
+
+/* Pattern cards */
+.pat-wrap{position:relative;margin-bottom:12px;}
+.pat-shadow{position:absolute;top:4px;left:4px;right:-4px;bottom:-4px;
+  background:var(--border-dark);border-radius:14px;z-index:0;}
+.pat-card{position:relative;z-index:1;background:var(--surface);
+  border:2.5px solid var(--pattern);border-left-width:7px;
+  border-left-color:var(--pattern);border-radius:14px;padding:12px 14px;
+  transition:transform .15s cubic-bezier(.34,1.56,.64,1);}
+.pat-card:hover{transform:translate(-2px,-2px);}
+.pat-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:5px;}
+.pat-badge{font-size:10px;font-weight:800;padding:3px 8px;border-radius:7px;
+  background:var(--pattern-light);color:#7a4f00;text-transform:uppercase;letter-spacing:.5px;}
+.pat-tk{font-family:'Nunito',sans-serif;font-weight:900;font-size:20px;}
+.pat-dir-buy{color:var(--bull);} .pat-dir-sell{color:var(--bear);}
+.pat-pol{font-size:13px;font-weight:800;color:var(--text);}
+.pat-meta{font-size:11.5px;color:var(--text-muted);margin-top:3px;line-height:1.4;}
+.pat-amounts{font-size:11px;color:var(--text-dim);margin-top:4px;font-family:ui-monospace,Menlo,monospace;}
+
+.section-label-cap{font-family:'Nunito',sans-serif;font-weight:900;font-size:13px;
+  text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);
+  margin:20px 0 10px;padding-bottom:5px;border-bottom:2px solid var(--border);}
+
+/* Trade rows */
 .cap-row{display:flex;align-items:center;gap:10px;background:var(--surface);
   border:2px solid var(--border);border-left-width:6px;border-radius:12px;
-  padding:10px 13px;margin-bottom:9px;}
-.cap-row.buy{border-left-color:var(--bull,#00a86b);}
-.cap-row.sell{border-left-color:var(--bear,#e8234a);}
+  padding:10px 13px;margin-bottom:9px;transition:opacity .15s;}
+.cap-row.buy{border-left-color:var(--bull);}
+.cap-row.sell{border-left-color:var(--bear);}
+.cap-row.hidden{display:none;}
 .cap-main{flex:1;min-width:0;}
 .cap-pol{font-family:'Nunito',sans-serif;font-weight:800;font-size:14px;}
 .cap-sub{font-size:11.5px;color:var(--text-muted);margin-top:1px;}
-.cap-tk{font-family:'Nunito',sans-serif;font-weight:900;font-size:16px;
-  white-space:nowrap;}
+.cap-tk{font-family:'Nunito',sans-serif;font-weight:900;font-size:16px;white-space:nowrap;}
 .cap-tk small{display:block;font-size:10px;font-weight:700;text-align:right;
   text-transform:uppercase;letter-spacing:.5px;}
-.cap-tk small.buy{color:var(--bull,#00a86b);} .cap-tk small.sell{color:var(--bear,#e8234a);}
-.cap-amt{font-size:11px;color:var(--text-dim);white-space:nowrap;text-align:right;}
+.cap-tk small.buy{color:var(--bull);} .cap-tk small.sell{color:var(--bear);}
 .cap-floor{font-size:11px;color:var(--text-dim);margin-bottom:12px;font-weight:700;}
-.cap-row.flagged{border-left-color:var(--catalyst);background:var(--catalyst-light);}
-.cap-flag{display:inline-block;margin-top:5px;font-size:10px;font-weight:800;
-  padding:3px 8px;border-radius:7px;background:var(--catalyst);color:#fff;
-  text-transform:uppercase;letter-spacing:.5px;}
-.cap-flag-note{font-size:11px;color:var(--catalyst);font-weight:700;margin-top:3px;}
-
-/* --- Restructured Capitol tab --- */
-.cap-section-label{font-family:'Nunito',sans-serif;font-weight:900;font-size:14px;
-  text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);
-  margin:22px 0 12px;padding-bottom:6px;border-bottom:2px solid var(--border);}
-.cap-section-label:first-child{margin-top:4px;}
-.cap-section-label .n{color:var(--catalyst);}
-
-/* Overlap cards (pinned section) — roomier than firehose rows */
-.ov-card-wrap{position:relative;margin-bottom:14px;}
-.ov-card-shadow{position:absolute;top:5px;left:5px;right:-5px;bottom:-5px;
-  background:var(--border-dark);border-radius:14px;z-index:0;}
-.ov-card{position:relative;z-index:1;background:var(--catalyst-light);
-  border:2.5px solid var(--catalyst);border-left-width:7px;border-radius:14px;
-  padding:12px 14px;}
-.ov-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:7px;}
-.ov-sector{font-size:10px;font-weight:800;padding:3px 9px;border-radius:7px;
-  background:var(--catalyst);color:#fff;text-transform:uppercase;letter-spacing:.5px;}
-.ov-side{font-size:10px;font-weight:800;padding:3px 8px;border-radius:7px;
-  text-transform:uppercase;letter-spacing:.5px;}
-.ov-side.buy{background:#d4f5e9;color:#00a86b;} .ov-side.sell{background:#ffdde3;color:#e8234a;}
-.ov-pol{font-family:'Nunito',sans-serif;font-weight:900;font-size:17px;margin-bottom:2px;}
-.ov-pol .ch{font-weight:600;color:var(--text-dim);font-size:12px;}
-.ov-tk{font-family:'Nunito',sans-serif;font-weight:900;font-size:15px;color:var(--catalyst);}
-.ov-sub{font-size:12px;color:var(--text-muted);margin-top:4px;line-height:1.4;}
-.ov-note{font-size:11.5px;color:var(--catalyst);font-weight:700;margin-top:6px;line-height:1.35;}
-.cap-empty{background:var(--surface);border:2px dashed var(--border-dark);
-  border-radius:12px;padding:16px;font-size:13px;color:var(--text-muted);
-  line-height:1.45;text-align:center;}
-
-/* Collapsible charts panel */
-.charts-toggle{width:100%;display:flex;align-items:center;gap:8px;
-  background:var(--surface);border:2.5px solid var(--border-dark);border-radius:12px;
-  padding:11px 14px;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:900;
-  font-size:14px;color:var(--text);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;}
-.charts-toggle .chev{margin-left:auto;transition:transform .2s;font-size:12px;color:var(--text-dim);}
-.charts-toggle.open .chev{transform:rotate(90deg);}
-.charts-panel{display:none;margin-bottom:6px;}
-.charts-panel.open{display:block;}
-.win-toggle{display:flex;gap:8px;margin-bottom:12px;}
-.win-btn{flex:1;border-radius:11px;font-family:'Nunito Sans',sans-serif;font-weight:800;
-  border:2px solid var(--border-dark);background:var(--surface);color:var(--text-muted);
-  padding:7px;font-size:13px;cursor:pointer;}
-.win-btn.active{background:var(--accent);border-color:var(--accent);color:#063d39;}
-.charts-row{display:flex;gap:10px;}
-.chart-box{flex:1;min-width:0;background:var(--surface);border:2.5px solid var(--border);
-  border-radius:14px;padding:11px 10px 9px;}
-.chart-title{font-family:'Nunito',sans-serif;font-weight:900;font-size:12px;
-  text-transform:uppercase;letter-spacing:.4px;color:var(--text);margin-bottom:2px;}
-.chart-sub{font-size:10px;color:var(--text-dim);font-weight:700;margin-bottom:8px;line-height:1.3;}
-.chart-box svg{width:100%;height:auto;display:block;}
-.chart-legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:7px;font-size:10px;font-weight:700;color:var(--text-muted);}
-.chart-legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:3px;vertical-align:-1px;}
-.chart-empty{font-size:11px;color:var(--text-dim);text-align:center;padding:24px 6px;}
+.no-results{text-align:center;color:var(--text-muted);padding:20px;font-size:13px;display:none;}
 </style>
 </head>
 <body>
@@ -214,9 +191,7 @@ body{
   </div>
 
   <div id="view-capitol" style="display:none">
-    <div id="cap-overlaps"></div>
-    <div id="cap-charts"></div>
-    <div id="cap-list"></div>
+    <div id="capitol-feed"></div>
   </div>
 </div>
 
@@ -238,8 +213,7 @@ async function load(){
   }
   if(!HISTORY.length){
     document.getElementById('subline').textContent = 'No scans yet';
-    document.getElementById('feed').innerHTML =
-      '<div class="empty">No scans recorded yet.</div>';
+    document.getElementById('feed').innerHTML = '<div class="empty">No scans recorded yet.</div>';
     return;
   }
   document.getElementById('alerts-label').style.display='block';
@@ -255,7 +229,6 @@ async function loadBrief(){
   }catch(e){ return; }
   if(!hist.length){ return; }
   const b=hist[0];
-  // Render **bold** markdown lightly; escape first.
   let body=esc(b.brief||'').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
   wrap.innerHTML=`
     <div class="brief-wrap">
@@ -278,7 +251,7 @@ function buildControls(){
     b.className='btn'+(i===scanIndex?' active':'');
     const t=new Date(scan.generated_at);
     const n=(scan.alerts||[]).length;
-    b.textContent = (i===0?'Latest':t.toLocaleString([],{month:'numeric',day:'numeric',hour:'numeric',minute:'2-digit'})) + (n?` (${n})`:'');
+    b.textContent=(i===0?'Latest':t.toLocaleString([],{month:'numeric',day:'numeric',hour:'numeric',minute:'2-digit'}))+(n?` (${n})`:'');
     b.onclick=()=>{scanIndex=i;buildControls();render();};
     c.appendChild(b);
   });
@@ -287,9 +260,8 @@ function buildControls(){
 function render(){
   const scan=HISTORY[scanIndex];
   const t=new Date(scan.generated_at);
-  document.getElementById('subline').textContent =
+  document.getElementById('subline').textContent=
     t.toLocaleString([],{weekday:'short',hour:'numeric',minute:'2-digit'})+' ET scan';
-
   const qbar=document.getElementById('qbar'); qbar.innerHTML='';
   Object.values(scan.quotes||{}).forEach(q=>{
     const pct=q.percent==null?'':`<span class="${q.percent>=0?'up':'down'}">${q.percent>=0?'+':''}${q.percent.toFixed(2)}%</span>`;
@@ -297,7 +269,6 @@ function render(){
     el.innerHTML=`${q.ticker} $${(q.price||0).toFixed(2)} ${pct}`;
     qbar.appendChild(el);
   });
-
   const feed=document.getElementById('feed');
   const alerts=scan.alerts||[];
   if(!alerts.length){
@@ -305,7 +276,6 @@ function render(){
     return;
   }
   feed.innerHTML=alerts.map(cardHTML).join('');
-  // wire copy buttons
   document.querySelectorAll('.copy').forEach(btn=>{
     btn.onclick=()=>{
       const txt=decodeURIComponent(btn.dataset.paste);
@@ -338,9 +308,10 @@ function cardHTML(a){
     </div>
   </div>`;
 }
+
 function esc(s){return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 
-// Memphis shapes
+// ── Memphis shapes ──
 (function(){
   const layer=document.getElementById('shapes-layer');
   const cols=['#0ab5a8','#1a6ef5','#e8234a','#00a86b','#f5620a','#8b1af5','#f5a623'];
@@ -354,9 +325,9 @@ function esc(s){return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt
   ];
   let html='';
   for(let i=0;i<16;i++){
-    const c=cols[i%cols.length], s=svgs[i%svgs.length](c);
-    const side=i%2?'right':'left', off=4+Math.random()*8;
-    const top=80+i*(130+(i%3)*40), rot=(Math.random()*40-20).toFixed(0);
+    const c=cols[i%cols.length],s=svgs[i%svgs.length](c);
+    const side=i%2?'right':'left',off=4+Math.random()*8;
+    const top=80+i*(130+(i%3)*40),rot=(Math.random()*40-20).toFixed(0);
     html+=`<div class="ms" style="top:${top}px;${side}:${off}px;--r:${rot}deg">${s}</div>`;
   }
   layer.innerHTML=html;
@@ -368,6 +339,7 @@ function esc(s){return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt
   check();addEventListener('scroll',check,{passive:true});
 })();
 
+// ── Tab switching ──
 function switchTab(which){
   const m=which==='market';
   document.getElementById('view-market').style.display=m?'block':'none';
@@ -377,238 +349,107 @@ function switchTab(which){
   if(!m) loadCapitol();
 }
 
+// ── Capitol tab ──
 let CAPITOL_LOADED=false;
-let CAP_TRADES=[];
-let CAP_WINDOW='all';   // 'all' | '7d'
-const SECTORS=['Energy','Defense','Pharma','Tech','Finance'];
-const SECTOR_ABBR={Energy:'ENE',Defense:'DEF',Pharma:'PHA',Tech:'TEC',Finance:'FIN'};
+let ALL_TRADES=[];
 
 async function loadCapitol(){
   if(CAPITOL_LOADED) return;
+  const feed=document.getElementById('capitol-feed');
   let data;
   try{
     const res=await fetch('capitol.json?t='+Date.now());
     data=await res.json();
   }catch(e){
-    document.getElementById('cap-overlaps').innerHTML='<div class="empty">Capitol data not available yet.</div>';
+    feed.innerHTML='<div class="empty">Capitol data not available yet.</div>';
     return;
   }
   CAPITOL_LOADED=true;
-  CAP_TRADES=data.trades||[];
-  CAP_FLOOR=data.alert_floor||0;
-  if(!CAP_TRADES.length){
-    document.getElementById('cap-overlaps').innerHTML=
-      '<div class="empty">No disclosed trades yet. The nightly sync will populate this.</div>';
-    return;
+
+  const patterns=data.patterns||[];
+  const trades=data.trades||[];
+  ALL_TRADES=trades;
+  const floor=data.alert_floor||0;
+
+  let html='';
+
+  // Filter bar
+  html+=`
+    <div class="cap-filter">
+      <input type="text" id="cap-search" placeholder="Filter by name or ticker…" oninput="filterTrades(this.value)">
+    </div>`;
+
+  // Patterns section
+  if(patterns.length){
+    html+=`<div class="section-label-cap">🔁 Repeat Bets Detected</div>`;
+    html+=patterns.map(patCard).join('');
   }
-  renderOverlaps();
-  renderChartsPanel();
-  renderCapList();
-}
-let CAP_FLOOR=0;
 
-function isBuy(t){return /BUY|PURCHASE/.test(t.type||'');}
-
-// --- Window filter (by filing date) ---
-function windowed(){
-  if(CAP_WINDOW==='all') return CAP_TRADES;
-  const cut=new Date(); cut.setDate(cut.getDate()-7);
-  return CAP_TRADES.filter(t=>{
-    const d=new Date(t.filing_date||t.trade_date||0);
-    return !isNaN(d) && d>=cut;
-  });
-}
-
-// --- Pinned overlaps section ---
-function renderOverlaps(){
-  const el=document.getElementById('cap-overlaps');
-  const hits=CAP_TRADES.filter(t=>t.overlap);
-  let html=`<div class="cap-section-label">⚠ Committee Overlaps${hits.length?` <span class="n">(${hits.length})</span>`:''}</div>`;
-  if(!hits.length){
-    html+=`<div class="cap-empty">No committee overlaps in the current window. This is normal — a flag appears when a tracked member trades in a sector their committee oversees. (Add names to <b>committees.yaml</b> to widen coverage.)</div>`;
-    el.innerHTML=html; return;
+  // Trades section
+  if(!trades.length){
+    html+='<div class="empty">No disclosed trades yet. The nightly sync will populate this.</div>';
+  } else {
+    html+=`<div class="section-label-cap">All Disclosed Trades</div>`;
+    html+=`<div class="cap-floor">Showing all · Discord pings on $${floor.toLocaleString()}+ or spotlight names</div>`;
+    html+=`<div id="trade-list">${trades.map(capRow).join('')}</div>`;
+    html+=`<div class="no-results" id="no-results">No trades match that filter.</div>`;
   }
-  html+=hits.map(ovCard).join('');
-  el.innerHTML=html;
+
+  feed.innerHTML=html;
 }
 
-function ovCard(t){
-  const buy=isBuy(t);
-  const tk=t.ticker?esc(t.ticker):esc((t.asset||'').slice(0,18)||'—');
-  const note=t.overlap.committee_note?`<div class="ov-note">↳ ${esc(t.overlap.committee_note)}</div>`:'';
+function patCard(p){
+  const isBuy=p.direction==='BUY';
+  const dirCls=isBuy?'pat-dir-buy':'pat-dir-sell';
+  const dirEmoji=isBuy?'🟢':'🔴';
+  const amountsStr=esc((p.amounts||[]).join(' → '));
   return `
-  <div class="ov-card-wrap">
-    <div class="ov-card-shadow"></div>
-    <div class="ov-card">
-      <div class="ov-top">
-        <span class="ov-sector">${esc(t.overlap.sector)} overlap</span>
-        <span class="ov-side ${buy?'buy':'sell'}">${buy?'BUY':'SELL'}</span>
-        <span class="ov-tk">${tk}</span>
-      </div>
-      <div class="ov-pol">${esc(t.politician)} <span class="ch">${esc(t.chamber)}</span></div>
-      <div class="ov-sub">${esc(t.amount||'')} · traded ${esc(t.trade_date||'?')} · filed ${esc(t.filing_date||'?')}</div>
-      ${note}
-    </div>
-  </div>`;
-}
-
-// --- Collapsible charts panel ---
-function renderChartsPanel(){
-  const el=document.getElementById('cap-charts');
-  el.innerHTML=`
-    <button class="charts-toggle" id="chartsToggle">
-      📊 Sector Charts <span class="chev">▶</span>
-    </button>
-    <div class="charts-panel" id="chartsPanel">
-      <div class="win-toggle">
-        <button class="win-btn${CAP_WINDOW==='7d'?' active':''}" data-win="7d">Last 7 days</button>
-        <button class="win-btn${CAP_WINDOW==='all'?' active':''}" data-win="all">All recent</button>
-      </div>
-      <div class="charts-row">
-        <div class="chart-box">
-          <div class="chart-title">Sector Clustering</div>
-          <div class="chart-sub" id="clusterSub"></div>
-          <div id="clusterChart"></div>
-          <div class="chart-legend">
-            <span><i style="background:var(--accent)"></i>Trades</span>
-            <span><i style="background:var(--catalyst)"></i>Committee overlap</span>
-          </div>
+    <div class="pat-wrap">
+      <div class="pat-shadow"></div>
+      <div class="pat-card">
+        <div class="pat-head">
+          <span class="pat-tk">${esc(p.ticker)}</span>
+          <span class="pat-badge">🔁 Pattern</span>
+          <span class="badge" style="background:${isBuy?'var(--bull-light)':'var(--bear-light)'};color:${isBuy?'var(--bull)':'var(--bear)'}">
+            ${dirEmoji} ${esc(p.direction)}
+          </span>
         </div>
-        <div class="chart-box">
-          <div class="chart-title">Net Pressure</div>
-          <div class="chart-sub">Buys vs sells, by trade count</div>
-          <div id="pressureChart"></div>
-          <div class="chart-legend">
-            <span><i style="background:#00a86b"></i>Buys</span>
-            <span><i style="background:#e8234a"></i>Sells</span>
-          </div>
-        </div>
+        <div class="pat-pol">${esc(p.politician)} <span style="font-weight:600;color:var(--text-dim);font-size:11px">${esc(p.chamber)}</span></div>
+        <div class="pat-meta">${p.trade_count} trades over ${p.span_days} days · ${esc(p.first_trade)} → ${esc(p.last_trade)}</div>
+        <div class="pat-amounts">${amountsStr}</div>
       </div>
     </div>`;
-  const toggle=document.getElementById('chartsToggle');
-  const panel=document.getElementById('chartsPanel');
-  toggle.onclick=()=>{
-    const open=panel.classList.toggle('open');
-    toggle.classList.toggle('open',open);
-    if(open) drawCharts();
-  };
-  el.querySelectorAll('.win-btn').forEach(b=>{
-    b.onclick=()=>{
-      CAP_WINDOW=b.dataset.win;
-      el.querySelectorAll('.win-btn').forEach(x=>x.classList.toggle('active',x===b));
-      drawCharts();
-    };
-  });
-}
-
-function sectorStats(){
-  const data=windowed();
-  const s={};
-  SECTORS.forEach(k=>s[k]={total:0,overlap:0,buys:0,sells:0,dollars:0});
-  data.forEach(t=>{
-    const sec=t.sector;
-    if(!sec||!s[sec]) return;
-    s[sec].total++;
-    if(t.overlap) s[sec].overlap++;
-    if(isBuy(t)) s[sec].buys++; else s[sec].sells++;
-    s[sec].dollars+=Number(t.amount_floor||0);
-  });
-  return s;
-}
-
-function drawCharts(){
-  const s=sectorStats();
-  const active=SECTORS.filter(k=>s[k].total>0);
-  const totalDollars=SECTORS.reduce((a,k)=>a+s[k].dollars,0);
-  document.getElementById('clusterSub').textContent=
-    totalDollars>0?`Min disclosed ≈ $${(totalDollars/1000).toFixed(0)}k (est.)`:'By trade count';
-
-  // Chart 1: vertical stacked bars (teal base + orange overlap)
-  const c1=document.getElementById('clusterChart');
-  if(!active.length){ c1.innerHTML='<div class="chart-empty">No classified sectors in this window.</div>'; }
-  else{
-    const maxT=Math.max(...active.map(k=>s[k].total),1);
-    c1.innerHTML=vbars(active.map(k=>({
-      label:SECTOR_ABBR[k],
-      segs:[{v:s[k].total-s[k].overlap,c:'var(--accent)'},{v:s[k].overlap,c:'var(--catalyst)'}],
-      top:s[k].total
-    })),maxT);
-  }
-
-  // Chart 2: diverging vertical bars (buys up green / sells down red)
-  const c2=document.getElementById('pressureChart');
-  if(!active.length){ c2.innerHTML='<div class="chart-empty">No classified sectors in this window.</div>'; }
-  else{
-    const maxP=Math.max(...active.map(k=>Math.max(s[k].buys,s[k].sells)),1);
-    c2.innerHTML=diverging(active.map(k=>({
-      label:SECTOR_ABBR[k],up:s[k].buys,down:s[k].sells
-    })),maxP);
-  }
-}
-
-// Vertical stacked bar chart (SVG). rows:[{label,segs:[{v,c}],top}], maxV
-function vbars(rows,maxV){
-  const W=240,H=150,padB=22,padT=14,gap=10;
-  const n=rows.length, bw=(W-gap*(n+1))/n, scale=(H-padB-padT)/maxV;
-  let bars='';
-  rows.forEach((r,i)=>{
-    const x=gap+i*(bw+gap);
-    let y=H-padB;
-    r.segs.forEach(seg=>{
-      if(seg.v<=0) return;
-      const h=seg.v*scale;
-      y-=h;
-      bars+=`<rect x="${x}" y="${y}" width="${bw}" height="${h}" fill="${seg.c}" stroke="#15120a" stroke-width="2" rx="2"/>`;
-    });
-    bars+=`<text x="${x+bw/2}" y="${H-padB+14}" text-anchor="middle" font-size="11" font-weight="800" fill="#5a5040" font-family="Nunito Sans">${r.label}</text>`;
-    if(r.top>0) bars+=`<text x="${x+bw/2}" y="${y-4}" text-anchor="middle" font-size="11" font-weight="900" fill="#15120a" font-family="Nunito">${r.top}</text>`;
-  });
-  return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
-    <line x1="${gap-2}" y1="${H-padB}" x2="${W-gap+2}" y2="${H-padB}" stroke="#b8ae9e" stroke-width="2"/>${bars}</svg>`;
-}
-
-// Diverging vertical bars: buys up (green), sells down (red), zero line mid.
-function diverging(rows,maxV){
-  const W=240,H=150,padX=10,gap=10,mid=H/2;
-  const n=rows.length, bw=(W-gap*(n+1))/n, half=(H/2)-14, scale=half/maxV;
-  let bars='';
-  rows.forEach((r,i)=>{
-    const x=gap+i*(bw+gap);
-    if(r.up>0){const h=r.up*scale; bars+=`<rect x="${x}" y="${mid-h}" width="${bw}" height="${h}" fill="#00a86b" stroke="#15120a" stroke-width="2" rx="2"/>`;
-      bars+=`<text x="${x+bw/2}" y="${mid-h-3}" text-anchor="middle" font-size="10" font-weight="900" fill="#00a86b" font-family="Nunito">${r.up}</text>`;}
-    if(r.down>0){const h=r.down*scale; bars+=`<rect x="${x}" y="${mid}" width="${bw}" height="${h}" fill="#e8234a" stroke="#15120a" stroke-width="2" rx="2"/>`;
-      bars+=`<text x="${x+bw/2}" y="${mid+h+11}" text-anchor="middle" font-size="10" font-weight="900" fill="#e8234a" font-family="Nunito">${r.down}</text>`;}
-    bars+=`<text x="${x+bw/2}" y="${H-2}" text-anchor="middle" font-size="11" font-weight="800" fill="#5a5040" font-family="Nunito Sans">${r.label}</text>`;
-  });
-  return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
-    <line x1="${padX-2}" y1="${mid}" x2="${W-padX+2}" y2="${mid}" stroke="#b8ae9e" stroke-width="2"/>${bars}</svg>`;
-}
-
-// --- Full list (cleaned up) ---
-function renderCapList(){
-  const el=document.getElementById('cap-list');
-  const floorTxt=`<div class="cap-floor">Discord pings on $${CAP_FLOOR.toLocaleString()}+, spotlight names, or ⚠ committee overlaps</div>`;
-  el.innerHTML=`<div class="cap-section-label">All Disclosed Trades</div>`+floorTxt+CAP_TRADES.map(capRow).join('');
 }
 
 function capRow(t){
-  const buy=isBuy(t);
-  const cls=buy?'buy':'sell';
-  const label=buy?'BUY':'SELL';
+  const isBuy=/BUY|PURCHASE/.test(t.type);
+  const cls=isBuy?'buy':'sell';
+  const label=isBuy?'BUY':'SELL';
   const tk=t.ticker?esc(t.ticker):esc((t.asset||'').slice(0,16)||'—');
   const px=t.price?` · $${Number(t.price).toFixed(2)}`:'';
-  const ov=t.overlap;
-  const flag=ov?`<div><span class="cap-flag">⚠ ${esc(ov.sector)} overlap</span></div>`
-    +(ov.committee_note?`<div class="cap-flag-note">↳ ${esc(ov.committee_note)}</div>`:''):'';
+  // Store searchable text as data attribute for fast filtering
+  const searchVal=`${t.politician} ${t.ticker} ${t.asset}`.toLowerCase();
   return `
-    <div class="cap-row ${cls}${ov?' flagged':''}">
+    <div class="cap-row ${cls}" data-search="${esc(searchVal)}">
       <div class="cap-main">
         <div class="cap-pol">${esc(t.politician)} <span style="font-weight:600;color:var(--text-dim);font-size:11px">${esc(t.chamber)}</span></div>
         <div class="cap-sub">${esc(t.amount||'')} · traded ${esc(t.trade_date||'?')} · filed ${esc(t.filing_date||'?')}${px}</div>
-        ${flag}
       </div>
       <div class="cap-tk">${tk}<small class="${cls}">${label}</small></div>
     </div>`;
+}
+
+function filterTrades(query){
+  const q=query.trim().toLowerCase();
+  const rows=document.querySelectorAll('#trade-list .cap-row');
+  let visible=0;
+  rows.forEach(row=>{
+    const match=!q||row.dataset.search.includes(q);
+    row.classList.toggle('hidden',!match);
+    if(match) visible++;
+  });
+  const noResults=document.getElementById('no-results');
+  if(noResults) noResults.style.display=(q&&visible===0)?'block':'none';
 }
 
 load();
