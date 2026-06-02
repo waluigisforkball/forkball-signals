@@ -232,6 +232,13 @@ def build_paste_block(alert: dict) -> str:
         lines.append("Recent headlines:")
         for h in heads[:4]:
             lines.append(f"  - {h.get('headline','')} ({h.get('source','')}) {h.get('url','')}")
+    # Ask the skill (which the brief's API call can't load) to produce the same
+    # outputs the brief does: a 1–5 setup score, a plain-English aside for anything
+    # non-obvious, and a tailored follow-up prompt to keep the discussion going.
+    lines.append("")
+    lines.append("Include: a Setup Score (1–5, quality of the setup — not a buy call), "
+                 "a one-line plain-English aside for anything a newer trader wouldn't "
+                 "find obvious, and a ready-to-paste follow-up prompt to go deeper.")
     return "\n".join(lines)
 
 
