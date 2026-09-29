@@ -1,6 +1,433 @@
 {
   "history": [
     {
+      "generated_at": "2026-09-29T14:48:54.461896-04:00",
+      "alerts": [
+        {
+          "type": "move",
+          "ticker": "AAPL",
+          "reason": "AAPL moved -2.11% (current $331.25, threshold \u00b11.5%)",
+          "held": true,
+          "position": {
+            "ticker": "AAPL",
+            "account": "espp",
+            "type": "shares",
+            "tag": "core",
+            "note": "Apple ESPP, partially vested \u2014 treat as long-term core",
+            "move_threshold": 1.5
+          },
+          "quote": {
+            "ticker": "AAPL",
+            "price": 331.25,
+            "change": -7.15,
+            "percent": -2.1129,
+            "high": 337.085,
+            "low": 330.55,
+            "prev_close": 338.4
+          },
+          "headlines": [
+            {
+              "headline": "Most active S&P500 stocks in Tuesday's session",
+              "source": "ChartMill",
+              "url": "https://finnhub.io/api/news?id=57da3c33a98b6dff9df75407d1dc4d7cc57eb8111eda3462d1f025924b5a269f"
+            },
+            {
+              "headline": "Apple Falls 2% as Bank of America Flags Meta\u2019s Shopping Agent; Alphabet Slips, Microsoft Holds Steady",
+              "source": "Yahoo",
+              "url": "https://finnhub.io/api/news?id=079983d534993d813acc1a04372fd4576a566e907c6daf552a7fd3919d8b8148"
+            },
+            {
+              "headline": "Sector Update: Tech Stocks Mixed Tuesday Afternoon",
+              "source": "Yahoo",
+              "url": "https://finnhub.io/api/news?id=cef83c32344ea6fc5d24d5d28e2827f2a60e403652a25ab8eb9bfa59ca0d3d3e"
+            },
+            {
+              "headline": "Apple CEO John Ternus Reportedly Weighs A Leaner Organization \u2013 Here\u2019s The Key Things Under Consideration",
+              "source": "Yahoo",
+              "url": "https://finnhub.io/api/news?id=f02aea9741d47e2c46325a45504b799b635769cf067df88de3bc237dc067b577"
+            },
+            {
+              "headline": "Apple patches iPhone flaw used in 'extremely sophisticated' attacks, crypto wallets at risk",
+              "source": "Yahoo",
+              "url": "https://finnhub.io/api/news?id=de6fa52c08773b66f7efc9f84684beb9ac0ffac4873a00db3605a77053d23b8a"
+            }
+          ],
+          "paste_block": "Run your market-analyst framework on this.\n\nTicker: AAPL\nPrice: $331.25 (-2.11% today, day range $330.55\u2013$337.085)\nI HOLD this: shares in espp\nTrigger: AAPL moved -2.11% (current $331.25, threshold \u00b11.5%)\nRecent headlines:\n  - Most active S&P500 stocks in Tuesday's session (ChartMill) https://finnhub.io/api/news?id=57da3c33a98b6dff9df75407d1dc4d7cc57eb8111eda3462d1f025924b5a269f\n  - Apple Falls 2% as Bank of America Flags Meta\u2019s Shopping Agent; Alphabet Slips, Microsoft Holds Steady (Yahoo) https://finnhub.io/api/news?id=079983d534993d813acc1a04372fd4576a566e907c6daf552a7fd3919d8b8148\n  - Sector Update: Tech Stocks Mixed Tuesday Afternoon (Yahoo) https://finnhub.io/api/news?id=cef83c32344ea6fc5d24d5d28e2827f2a60e403652a25ab8eb9bfa59ca0d3d3e\n  - Apple CEO John Ternus Reportedly Weighs A Leaner Organization \u2013 Here\u2019s The Key Things Under Consideration (Yahoo) https://finnhub.io/api/news?id=f02aea9741d47e2c46325a45504b799b635769cf067df88de3bc237dc067b577\n\nInclude: a Setup Score (1\u20135, quality of the setup \u2014 not a buy call), a one-line plain-English aside for anything a newer trader wouldn't find obvious, and a ready-to-paste follow-up prompt to go deeper."
+        },
+        {
+          "type": "move",
+          "ticker": "CRSP",
+          "reason": "CRSP moved +3.70% (current $56.09, threshold \u00b13.0%)",
+          "held": true,
+          "position": {
+            "ticker": "CRSP",
+            "account": "etrade",
+            "type": "shares",
+            "tag": "swing",
+            "note": "CRISPR Therapeutics \u2014 gene editing, speculative biotech",
+            "move_threshold": 3.0
+          },
+          "quote": {
+            "ticker": "CRSP",
+            "price": 56.09,
+            "change": 2,
+            "percent": 3.6975,
+            "high": 56.44,
+            "low": 54,
+            "prev_close": 54.09
+          },
+          "headlines": [
+            {
+              "headline": "Beam Therapeutics: Ignore The Anthropic Noise And Focus On Clinical Progress",
+              "source": "SeekingAlpha",
+              "url": "https://finnhub.io/api/news?id=0b2f7f810f70395a2cacb2e0d08118903ac1ac743984c1905bf6998b3ab15787"
+            }
+          ],
+          "paste_block": "Run your market-analyst framework on this.\n\nTicker: CRSP\nPrice: $56.09 (+3.70% today, day range $54\u2013$56.44)\nI HOLD this: shares in etrade\nTrigger: CRSP moved +3.70% (current $56.09, threshold \u00b13.0%)\nRecent headlines:\n  - Beam Therapeutics: Ignore The Anthropic Noise And Focus On Clinical Progress (SeekingAlpha) https://finnhub.io/api/news?id=0b2f7f810f70395a2cacb2e0d08118903ac1ac743984c1905bf6998b3ab15787\n\nInclude: a Setup Score (1\u20135, quality of the setup \u2014 not a buy call), a one-line plain-English aside for anything a newer trader wouldn't find obvious, and a ready-to-paste follow-up prompt to go deeper."
+        },
+        {
+          "type": "catalyst",
+          "ticker": "DKNG",
+          "reason": "Catalyst theme 'gaming / sports betting' \u2014 matched: draftkings",
+          "theme": "gaming / sports betting",
+          "relevant_tickers": [
+            "NTDOY",
+            "DKNG"
+          ],
+          "held": true,
+          "quote": {
+            "ticker": "DKNG",
+            "price": 19.81,
+            "change": -1.35,
+            "percent": -6.38,
+            "high": 21.34,
+            "low": 19.75,
+            "prev_close": 21.16
+          },
+          "headlines": [
+            {
+              "headline": "DraftKings Stock Dips Due to Flutter's Weakness",
+              "source": "Benzinga",
+              "url": "https://finnhub.io/api/news?id=db11390ea95c3b046dc050a303ad73786345dc2a7f9fe44ba4ab34a3206b1e03"
+            }
+          ],
+          "paste_block": "Run your market-analyst framework on this.\n\nTicker: DKNG\nPrice: $19.81 (-6.38% today, day range $19.75\u2013$21.34)\nTrigger: Catalyst theme 'gaming / sports betting' \u2014 matched: draftkings\nRelated tickers: NTDOY, DKNG\nRecent headlines:\n  - DraftKings Stock Dips Due to Flutter's Weakness (Benzinga) https://finnhub.io/api/news?id=db11390ea95c3b046dc050a303ad73786345dc2a7f9fe44ba4ab34a3206b1e03\n\nInclude: a Setup Score (1\u20135, quality of the setup \u2014 not a buy call), a one-line plain-English aside for anything a newer trader wouldn't find obvious, and a ready-to-paste follow-up prompt to go deeper."
+        },
+        {
+          "type": "catalyst",
+          "ticker": "NVDA",
+          "reason": "Catalyst theme 'AI / chips' \u2014 matched: gpu",
+          "theme": "AI / chips",
+          "relevant_tickers": [
+            "NVDA",
+            "AMD",
+            "TSM",
+            "MSFT"
+          ],
+          "held": false,
+          "quote": {
+            "ticker": "NVDA",
+            "price": 227.97,
+            "change": -0.89,
+            "percent": -0.3889,
+            "high": 232.82,
+            "low": 227.69,
+            "prev_close": 228.86
+          },
+          "headlines": [
+            {
+              "headline": "Hivelocity Brings GPU-Accelerated Local AI Capabilities to Its Bare Metal Bundles",
+              "source": "Yahoo",
+              "url": "https://finnhub.io/api/news?id=e3bc28cc31e95213fc9938bc0625682437e0f818674bdf8ca8d851024234f7e6"
+            }
+          ],
+          "paste_block": "Run your market-analyst framework on this.\n\nTicker: NVDA\nPrice: $227.97 (-0.39% today, day range $227.69\u2013$232.82)\nTrigger: Catalyst theme 'AI / chips' \u2014 matched: gpu\nRelated tickers: NVDA, AMD, TSM, MSFT\nRecent headlines:\n  - Hivelocity Brings GPU-Accelerated Local AI Capabilities to Its Bare Metal Bundles (Yahoo) https://finnhub.io/api/news?id=e3bc28cc31e95213fc9938bc0625682437e0f818674bdf8ca8d851024234f7e6\n\nInclude: a Setup Score (1\u20135, quality of the setup \u2014 not a buy call), a one-line plain-English aside for anything a newer trader wouldn't find obvious, and a ready-to-paste follow-up prompt to go deeper."
+        },
+        {
+          "type": "catalyst",
+          "ticker": "AMD",
+          "reason": "Catalyst theme 'AI / chips' \u2014 matched: nvidia",
+          "theme": "AI / chips",
+          "relevant_tickers": [
+            "NVDA",
+            "AMD",
+            "TSM",
+            "MSFT"
+          ],
+          "held": false,
+          "quote": {
+            "ticker": "AMD",
+            "price": 610.63,
+            "change": 2.76,
+            "percent": 0.454,
+            "high": 624.13,
+            "low": 607.695,
+            "prev_close": 607.87
+          },
+          "headlines": [
+            {
+              "headline": "AMD's $8.2 Billion AI Deal Takes Aim at Nvidia's Biggest Advantage",
+              "source": "Yahoo",
+              "url": "https://finnhub.io/api/news?id=04a77a7a7a24d1a7dc3bbc9a060a1271af56a158681385f9a4b07628db84b3d0"
+            }
+          ],
+          "paste_block": "Run your market-analyst framework on this.\n\nTicker: AMD\nPrice: $610.63 (+0.45% today, day range $607.695\u2013$624.13)\nTrigger: Catalyst theme 'AI / chips' \u2014 matched: nvidia\nRelated tickers: NVDA, AMD, TSM, MSFT\nRecent headlines:\n  - AMD's $8.2 Billion AI Deal Takes Aim at Nvidia's Biggest Advantage (Yahoo) https://finnhub.io/api/news?id=04a77a7a7a24d1a7dc3bbc9a060a1271af56a158681385f9a4b07628db84b3d0\n\nInclude: a Setup Score (1\u20135, quality of the setup \u2014 not a buy call), a one-line plain-English aside for anything a newer trader wouldn't find obvious, and a ready-to-paste follow-up prompt to go deeper."
+        },
+        {
+          "type": "catalyst",
+          "ticker": "NTDOY",
+          "reason": "Catalyst theme 'gaming / sports betting' \u2014 matched: nintendo",
+          "theme": "gaming / sports betting",
+          "relevant_tickers": [
+            "NTDOY",
+            "DKNG"
+          ],
+          "held": false,
+          "quote": {
+            "ticker": "NTDOY",
+            "price": 12.43,
+            "change": 0.07,
+            "percent": 0.5663,
+            "high": 12.66,
+            "low": 12.39,
+            "prev_close": 12.36
+          },
+          "headlines": [
+            {
+              "headline": "Nintendo: Why Even GTA 6 Can't Touch The House Of Mario",
+              "source": "SeekingAlpha",
+              "url": "https://finnhub.io/api/news?id=3fa3becca7ba19bc4271a778ac1d5420da85c3be3a40ead7f781230317b47d31"
+            }
+          ],
+          "paste_block": "Run your market-analyst framework on this.\n\nTicker: NTDOY\nPrice: $12.43 (+0.57% today, day range $12.39\u2013$12.66)\nTrigger: Catalyst theme 'gaming / sports betting' \u2014 matched: nintendo\nRelated tickers: NTDOY, DKNG\nRecent headlines:\n  - Nintendo: Why Even GTA 6 Can't Touch The House Of Mario (SeekingAlpha) https://finnhub.io/api/news?id=3fa3becca7ba19bc4271a778ac1d5420da85c3be3a40ead7f781230317b47d31\n\nInclude: a Setup Score (1\u20135, quality of the setup \u2014 not a buy call), a one-line plain-English aside for anything a newer trader wouldn't find obvious, and a ready-to-paste follow-up prompt to go deeper."
+        }
+      ],
+      "quotes": {
+        "IVV": {
+          "ticker": "IVV",
+          "price": 767.85,
+          "change": -1.08,
+          "percent": -0.1405,
+          "high": 770.49,
+          "low": 765.705,
+          "prev_close": 768.93
+        },
+        "AAPL": {
+          "ticker": "AAPL",
+          "price": 331.25,
+          "change": -7.15,
+          "percent": -2.1129,
+          "high": 337.085,
+          "low": 330.55,
+          "prev_close": 338.4
+        },
+        "SPGI": {
+          "ticker": "SPGI",
+          "price": 390.61,
+          "change": -5.31,
+          "percent": -1.3412,
+          "high": 394.92,
+          "low": 388.57,
+          "prev_close": 395.92
+        },
+        "CRSP": {
+          "ticker": "CRSP",
+          "price": 56.09,
+          "change": 2,
+          "percent": 3.6975,
+          "high": 56.44,
+          "low": 54,
+          "prev_close": 54.09
+        },
+        "CHWY": {
+          "ticker": "CHWY",
+          "price": 18.3,
+          "change": -0.31,
+          "percent": -1.6658,
+          "high": 18.965,
+          "low": 18.22,
+          "prev_close": 18.61
+        },
+        "DKNG": {
+          "ticker": "DKNG",
+          "price": 19.81,
+          "change": -1.35,
+          "percent": -6.38,
+          "high": 21.34,
+          "low": 19.75,
+          "prev_close": 21.16
+        },
+        "GME": {
+          "ticker": "GME",
+          "price": 23.56,
+          "change": -0.4,
+          "percent": -1.6694,
+          "high": 24.07,
+          "low": 23.3,
+          "prev_close": 23.96
+        },
+        "HYSR": {
+          "ticker": "HYSR",
+          "price": 0.0175,
+          "change": -0.0005,
+          "percent": -2.7778,
+          "high": 0.018,
+          "low": 0.0165,
+          "prev_close": 0.018
+        },
+        "SNDL": {
+          "ticker": "SNDL",
+          "price": 1.38,
+          "change": -0.01,
+          "percent": -0.7194,
+          "high": 1.41,
+          "low": 1.355,
+          "prev_close": 1.39
+        },
+        "SPY": {
+          "ticker": "SPY",
+          "price": 764.55,
+          "change": -1.06,
+          "percent": -0.1385,
+          "high": 766.98,
+          "low": 762.35,
+          "prev_close": 765.61
+        },
+        "QQQ": {
+          "ticker": "QQQ",
+          "price": 738.36,
+          "change": 1.83,
+          "percent": 0.2485,
+          "high": 740.5799,
+          "low": 735.34,
+          "prev_close": 736.53
+        },
+        "NVDA": {
+          "ticker": "NVDA",
+          "price": 227.97,
+          "change": -0.89,
+          "percent": -0.3889,
+          "high": 232.82,
+          "low": 227.69,
+          "prev_close": 228.86
+        },
+        "AMD": {
+          "ticker": "AMD",
+          "price": 610.63,
+          "change": 2.76,
+          "percent": 0.454,
+          "high": 624.13,
+          "low": 607.695,
+          "prev_close": 607.87
+        },
+        "MSFT": {
+          "ticker": "MSFT",
+          "price": 510.7,
+          "change": 1.48,
+          "percent": 0.2906,
+          "high": 513.64,
+          "low": 502.4,
+          "prev_close": 509.22
+        },
+        "TSM": {
+          "ticker": "TSM",
+          "price": 458.89,
+          "change": 6.01,
+          "percent": 1.3271,
+          "high": 459.43,
+          "low": 447.07,
+          "prev_close": 452.88
+        },
+        "XBI": {
+          "ticker": "XBI",
+          "price": 156.53,
+          "change": -0.08,
+          "percent": -0.0511,
+          "high": 157.82,
+          "low": 154.515,
+          "prev_close": 156.61
+        },
+        "EDIT": {
+          "ticker": "EDIT",
+          "price": 2.62,
+          "change": 0.11,
+          "percent": 4.3825,
+          "high": 2.62,
+          "low": 2.51,
+          "prev_close": 2.51
+        },
+        "BEAM": {
+          "ticker": "BEAM",
+          "price": 24.62,
+          "change": 0.39,
+          "percent": 1.6096,
+          "high": 24.770000000000003,
+          "low": 23.88,
+          "prev_close": 24.23
+        },
+        "MRNA": {
+          "ticker": "MRNA",
+          "price": 199,
+          "change": 1.72,
+          "percent": 0.8719,
+          "high": 208.9032,
+          "low": 190,
+          "prev_close": 197.28
+        },
+        "NTDOY": {
+          "ticker": "NTDOY",
+          "price": 12.43,
+          "change": 0.07,
+          "percent": 0.5663,
+          "high": 12.66,
+          "low": 12.39,
+          "prev_close": 12.36
+        },
+        "GOOGL": {
+          "ticker": "GOOGL",
+          "price": 340.08,
+          "change": -2.67,
+          "percent": -0.779,
+          "high": 342.84,
+          "low": 338.02,
+          "prev_close": 342.75
+        },
+        "AMZN": {
+          "ticker": "AMZN",
+          "price": 247.86,
+          "change": 1.71,
+          "percent": 0.6947,
+          "high": 248.4824,
+          "low": 245.14,
+          "prev_close": 246.15
+        }
+      },
+      "scanned": [
+        "IVV",
+        "AAPL",
+        "SPGI",
+        "CRSP",
+        "CHWY",
+        "DKNG",
+        "GME",
+        "HYSR",
+        "SNDL",
+        "SPY",
+        "QQQ",
+        "NVDA",
+        "AMD",
+        "MSFT",
+        "TSM",
+        "XBI",
+        "EDIT",
+        "BEAM",
+        "MRNA",
+        "NTDOY",
+        "GOOGL",
+        "AMZN"
+      ]
+    },
+    {
       "generated_at": "2026-09-25T15:56:21.730523-04:00",
       "alerts": [
         {
@@ -27018,521 +27445,6 @@
           "price": 261.2,
           "change": -4.64,
           "percent": -1.7454,
-          "high": 264.945,
-          "low": 259.92,
-          "prev_close": 265.84
-        }
-      },
-      "scanned": [
-        "IVV",
-        "AAPL",
-        "SPGI",
-        "CRSP",
-        "CHWY",
-        "DKNG",
-        "GME",
-        "HYSR",
-        "SNDL",
-        "SPY",
-        "QQQ",
-        "NVDA",
-        "AMD",
-        "MSFT",
-        "TSM",
-        "XBI",
-        "EDIT",
-        "BEAM",
-        "MRNA",
-        "NTDOY",
-        "GOOGL",
-        "AMZN"
-      ]
-    },
-    {
-      "generated_at": "2026-08-20T12:40:35.359423-04:00",
-      "alerts": [
-        {
-          "type": "move",
-          "ticker": "XBI",
-          "reason": "XBI moved -3.45% (current $163.70, threshold \u00b12.0%)",
-          "held": false,
-          "position": null,
-          "quote": {
-            "ticker": "XBI",
-            "price": 163.7,
-            "change": -5.85,
-            "percent": -3.4503,
-            "high": 167.53,
-            "low": 163.25,
-            "prev_close": 169.55
-          },
-          "headlines": [
-            {
-              "headline": "Healthy And Energized At New Highs",
-              "source": "SeekingAlpha",
-              "url": "https://finnhub.io/api/news?id=9b6224d21f27fe96ca090f5954606bf50b94bfbf2f0d296aa71c91b99d55df7a"
-            },
-            {
-              "headline": "Merck, Moderna Cancer Vaccine Breakthrough Could Be Catalyst the mRNA ETF Trade Has Been Waiting For",
-              "source": "Benzinga",
-              "url": "https://finnhub.io/api/news?id=e659e73d22839029cea2173919dcf3b7ff288bcb4eeaab2bc415bc01a742d05d"
-            },
-            {
-              "headline": "Novavax Stock Moves Higher Wednesday: What's Driving the Action?",
-              "source": "Benzinga",
-              "url": "https://finnhub.io/api/news?id=38703ee6ec11322616dc3bb7da65d98551dd3409324e69cb430a0214528af82b"
-            }
-          ],
-          "paste_block": "Run your market-analyst framework on this.\n\nTicker: XBI\nPrice: $163.7 (-3.45% today, day range $163.25\u2013$167.53)\nTrigger: XBI moved -3.45% (current $163.70, threshold \u00b12.0%)\nRecent headlines:\n  - Healthy And Energized At New Highs (SeekingAlpha) https://finnhub.io/api/news?id=9b6224d21f27fe96ca090f5954606bf50b94bfbf2f0d296aa71c91b99d55df7a\n  - Merck, Moderna Cancer Vaccine Breakthrough Could Be Catalyst the mRNA ETF Trade Has Been Waiting For (Benzinga) https://finnhub.io/api/news?id=e659e73d22839029cea2173919dcf3b7ff288bcb4eeaab2bc415bc01a742d05d\n  - Novavax Stock Moves Higher Wednesday: What's Driving the Action? (Benzinga) https://finnhub.io/api/news?id=38703ee6ec11322616dc3bb7da65d98551dd3409324e69cb430a0214528af82b\n\nInclude: a Setup Score (1\u20135, quality of the setup \u2014 not a buy call), a one-line plain-English aside for anything a newer trader wouldn't find obvious, and a ready-to-paste follow-up prompt to go deeper."
-        },
-        {
-          "type": "move",
-          "ticker": "MRNA",
-          "reason": "MRNA moved -24.58% (current $131.52, threshold \u00b13.0%)",
-          "held": false,
-          "position": null,
-          "quote": {
-            "ticker": "MRNA",
-            "price": 131.52,
-            "change": -42.86,
-            "percent": -24.5785,
-            "high": 155,
-            "low": 130.35,
-            "prev_close": 174.38
-          },
-          "headlines": [
-            {
-              "headline": "What's going on in today's session: S&P500 gap up and gap down stocks",
-              "source": "ChartMill",
-              "url": "https://finnhub.io/api/news?id=ef70edb58f9fe1b11a1770035da318102536f2c67402e358f9a9b937fd482e0a"
-            },
-            {
-              "headline": "These S&P500 stocks that are showing activity before the opening bell on Thursday.",
-              "source": "ChartMill",
-              "url": "https://finnhub.io/api/news?id=710c4f6ba1bc6547fe0bdb24de23d157524b5f38b704e2396156c75b4c0b5bc2"
-            },
-            {
-              "headline": "Stock Market Today: Dow Jones, S&P 500, Nasdaq 100 Futures Fall as Trump Launches \u2018Operation Economic Fury\u2019 on Iran\u2014 BULL, WMT, MRK Stock in Focus (UPDATED)",
-              "source": "Benzinga",
-              "url": "https://finnhub.io/api/news?id=bdf52e47b57a45524ab51963ebe64f43e347599af34cade8a165280971f79d8d"
-            },
-            {
-              "headline": "Okta To Rally More Than 20%? Here Are 10 Top Analyst Forecasts For Thursday",
-              "source": "Benzinga",
-              "url": "https://finnhub.io/api/news?id=6eabbfd293f00b11fa7b0d65344a4f503d89c94b82d3fbd4985dd1bdd77570cb"
-            },
-            {
-              "headline": "Coty Posts Mixed Q4 Results, Joins Wolfspeed, ATRenew And Other Big Stocks Moving Lower In Thursday\u2019s Pre-Market Session",
-              "source": "Benzinga",
-              "url": "https://finnhub.io/api/news?id=311bb1749a844fe1f48ea7e3177fe36789b5dfb762695268ea4d17fe4491b874"
-            }
-          ],
-          "paste_block": "Run your market-analyst framework on this.\n\nTicker: MRNA\nPrice: $131.52 (-24.58% today, day range $130.35\u2013$155)\nTrigger: MRNA moved -24.58% (current $131.52, threshold \u00b13.0%)\nRecent headlines:\n  - What's going on in today's session: S&P500 gap up and gap down stocks (ChartMill) https://finnhub.io/api/news?id=ef70edb58f9fe1b11a1770035da318102536f2c67402e358f9a9b937fd482e0a\n  - These S&P500 stocks that are showing activity before the opening bell on Thursday. (ChartMill) https://finnhub.io/api/news?id=710c4f6ba1bc6547fe0bdb24de23d157524b5f38b704e2396156c75b4c0b5bc2\n  - Stock Market Today: Dow Jones, S&P 500, Nasdaq 100 Futures Fall as Trump Launches \u2018Operation Economic Fury\u2019 on Iran\u2014 BULL, WMT, MRK Stock in Focus (UPDATED) (Benzinga) https://finnhub.io/api/news?id=bdf52e47b57a45524ab51963ebe64f43e347599af34cade8a165280971f79d8d\n  - Okta To Rally More Than 20%? Here Are 10 Top Analyst Forecasts For Thursday (Benzinga) https://finnhub.io/api/news?id=6eabbfd293f00b11fa7b0d65344a4f503d89c94b82d3fbd4985dd1bdd77570cb\n\nInclude: a Setup Score (1\u20135, quality of the setup \u2014 not a buy call), a one-line plain-English aside for anything a newer trader wouldn't find obvious, and a ready-to-paste follow-up prompt to go deeper."
-        },
-        {
-          "type": "catalyst",
-          "ticker": "NVDA",
-          "reason": "Catalyst theme 'AI / chips' \u2014 matched: nvidia",
-          "theme": "AI / chips",
-          "relevant_tickers": [
-            "NVDA",
-            "AMD",
-            "TSM",
-            "MSFT"
-          ],
-          "held": false,
-          "quote": {
-            "ticker": "NVDA",
-            "price": 216.95,
-            "change": -0.61,
-            "percent": -0.2804,
-            "high": 219.86,
-            "low": 215.66,
-            "prev_close": 217.56
-          },
-          "headlines": [
-            {
-              "headline": "CoreWeave Lands Multibillion-Dollar Hudson River Deal as Wall Street Races for Nvidia Chips",
-              "source": "Benzinga",
-              "url": "https://finnhub.io/api/news?id=8cfc4b742ab1b52daa98e5678147ad342d5e9dcaefdd61ad243bcce4ee50dc4c"
-            }
-          ],
-          "paste_block": "Run your market-analyst framework on this.\n\nTicker: NVDA\nPrice: $216.95 (-0.28% today, day range $215.66\u2013$219.86)\nTrigger: Catalyst theme 'AI / chips' \u2014 matched: nvidia\nRelated tickers: NVDA, AMD, TSM, MSFT\nRecent headlines:\n  - CoreWeave Lands Multibillion-Dollar Hudson River Deal as Wall Street Races for Nvidia Chips (Benzinga) https://finnhub.io/api/news?id=8cfc4b742ab1b52daa98e5678147ad342d5e9dcaefdd61ad243bcce4ee50dc4c\n\nInclude: a Setup Score (1\u20135, quality of the setup \u2014 not a buy call), a one-line plain-English aside for anything a newer trader wouldn't find obvious, and a ready-to-paste follow-up prompt to go deeper."
-        },
-        {
-          "type": "catalyst",
-          "ticker": "AMD",
-          "reason": "Catalyst theme 'AI / chips' \u2014 matched: nvidia",
-          "theme": "AI / chips",
-          "relevant_tickers": [
-            "NVDA",
-            "AMD",
-            "TSM",
-            "MSFT"
-          ],
-          "held": false,
-          "quote": {
-            "ticker": "AMD",
-            "price": 463.9,
-            "change": -2.52,
-            "percent": -0.5403,
-            "high": 475.5299,
-            "low": 460.27,
-            "prev_close": 466.42
-          },
-          "headlines": [
-            {
-              "headline": "Nvidia: The Greatest Company At A Fair Price",
-              "source": "SeekingAlpha",
-              "url": "https://finnhub.io/api/news?id=e13ecf41fadd7f9e572dadd5e3bdc5317777a408234248d7e28300b61060f4d3"
-            }
-          ],
-          "paste_block": "Run your market-analyst framework on this.\n\nTicker: AMD\nPrice: $463.9 (-0.54% today, day range $460.27\u2013$475.5299)\nTrigger: Catalyst theme 'AI / chips' \u2014 matched: nvidia\nRelated tickers: NVDA, AMD, TSM, MSFT\nRecent headlines:\n  - Nvidia: The Greatest Company At A Fair Price (SeekingAlpha) https://finnhub.io/api/news?id=e13ecf41fadd7f9e572dadd5e3bdc5317777a408234248d7e28300b61060f4d3\n\nInclude: a Setup Score (1\u20135, quality of the setup \u2014 not a buy call), a one-line plain-English aside for anything a newer trader wouldn't find obvious, and a ready-to-paste follow-up prompt to go deeper."
-        },
-        {
-          "type": "catalyst",
-          "ticker": "MSFT",
-          "reason": "Catalyst theme 'AI / chips' \u2014 matched: nvidia",
-          "theme": "AI / chips",
-          "relevant_tickers": [
-            "NVDA",
-            "AMD",
-            "TSM",
-            "MSFT"
-          ],
-          "held": false,
-          "quote": {
-            "ticker": "MSFT",
-            "price": 483.71,
-            "change": -0.6,
-            "percent": -0.1239,
-            "high": 484.16,
-            "low": 479.5,
-            "prev_close": 484.31
-          },
-          "headlines": [
-            {
-              "headline": "Nvidia: The Greatest Company At A Fair Price",
-              "source": "SeekingAlpha",
-              "url": "https://finnhub.io/api/news?id=e13ecf41fadd7f9e572dadd5e3bdc5317777a408234248d7e28300b61060f4d3"
-            }
-          ],
-          "paste_block": "Run your market-analyst framework on this.\n\nTicker: MSFT\nPrice: $483.71 (-0.12% today, day range $479.5\u2013$484.16)\nTrigger: Catalyst theme 'AI / chips' \u2014 matched: nvidia\nRelated tickers: NVDA, AMD, TSM, MSFT\nRecent headlines:\n  - Nvidia: The Greatest Company At A Fair Price (SeekingAlpha) https://finnhub.io/api/news?id=e13ecf41fadd7f9e572dadd5e3bdc5317777a408234248d7e28300b61060f4d3\n\nInclude: a Setup Score (1\u20135, quality of the setup \u2014 not a buy call), a one-line plain-English aside for anything a newer trader wouldn't find obvious, and a ready-to-paste follow-up prompt to go deeper."
-        },
-        {
-          "type": "catalyst",
-          "ticker": "TSM",
-          "reason": "Catalyst theme 'AI / chips' \u2014 matched: semiconductor",
-          "theme": "AI / chips",
-          "relevant_tickers": [
-            "NVDA",
-            "AMD",
-            "TSM",
-            "MSFT"
-          ],
-          "held": false,
-          "quote": {
-            "ticker": "TSM",
-            "price": 415.47,
-            "change": 3.38,
-            "percent": 0.8202,
-            "high": 417.96,
-            "low": 407.7183,
-            "prev_close": 412.09
-          },
-          "headlines": [
-            {
-              "headline": "Taiwan Semiconductor\u2019s AI Bottleneck Hands Samsung a Powerful Pricing Opportunity",
-              "source": "Benzinga",
-              "url": "https://finnhub.io/api/news?id=d3e68ad50cd62bb2eda41d53822a55b0ed049f85c81afb4a03b02db6193e0b92"
-            }
-          ],
-          "paste_block": "Run your market-analyst framework on this.\n\nTicker: TSM\nPrice: $415.47 (+0.82% today, day range $407.7183\u2013$417.96)\nTrigger: Catalyst theme 'AI / chips' \u2014 matched: semiconductor\nRelated tickers: NVDA, AMD, TSM, MSFT\nRecent headlines:\n  - Taiwan Semiconductor\u2019s AI Bottleneck Hands Samsung a Powerful Pricing Opportunity (Benzinga) https://finnhub.io/api/news?id=d3e68ad50cd62bb2eda41d53822a55b0ed049f85c81afb4a03b02db6193e0b92\n\nInclude: a Setup Score (1\u20135, quality of the setup \u2014 not a buy call), a one-line plain-English aside for anything a newer trader wouldn't find obvious, and a ready-to-paste follow-up prompt to go deeper."
-        },
-        {
-          "type": "catalyst",
-          "ticker": "GOOGL",
-          "reason": "Catalyst theme 'AI / chips' \u2014 matched: nvidia",
-          "theme": "AI / chips",
-          "relevant_tickers": [
-            "NVDA",
-            "AMD",
-            "TSM",
-            "MSFT"
-          ],
-          "held": false,
-          "quote": {
-            "ticker": "GOOGL",
-            "price": 341.65,
-            "change": -3.07,
-            "percent": -0.8906,
-            "high": 343.93,
-            "low": 338.5651,
-            "prev_close": 344.72
-          },
-          "headlines": [
-            {
-              "headline": "Nvidia: The Greatest Company At A Fair Price",
-              "source": "SeekingAlpha",
-              "url": "https://finnhub.io/api/news?id=e13ecf41fadd7f9e572dadd5e3bdc5317777a408234248d7e28300b61060f4d3"
-            }
-          ],
-          "paste_block": "Run your market-analyst framework on this.\n\nTicker: GOOGL\nPrice: $341.65 (-0.89% today, day range $338.5651\u2013$343.93)\nTrigger: Catalyst theme 'AI / chips' \u2014 matched: nvidia\nRelated tickers: NVDA, AMD, TSM, MSFT\nRecent headlines:\n  - Nvidia: The Greatest Company At A Fair Price (SeekingAlpha) https://finnhub.io/api/news?id=e13ecf41fadd7f9e572dadd5e3bdc5317777a408234248d7e28300b61060f4d3\n\nInclude: a Setup Score (1\u20135, quality of the setup \u2014 not a buy call), a one-line plain-English aside for anything a newer trader wouldn't find obvious, and a ready-to-paste follow-up prompt to go deeper."
-        },
-        {
-          "type": "catalyst",
-          "ticker": "AMZN",
-          "reason": "Catalyst theme 'AI / chips' \u2014 matched: nvidia",
-          "theme": "AI / chips",
-          "relevant_tickers": [
-            "NVDA",
-            "AMD",
-            "TSM",
-            "MSFT"
-          ],
-          "held": false,
-          "quote": {
-            "ticker": "AMZN",
-            "price": 263.48,
-            "change": -2.36,
-            "percent": -0.8878,
-            "high": 264.945,
-            "low": 259.92,
-            "prev_close": 265.84
-          },
-          "headlines": [
-            {
-              "headline": "Nvidia: The Greatest Company At A Fair Price",
-              "source": "SeekingAlpha",
-              "url": "https://finnhub.io/api/news?id=e13ecf41fadd7f9e572dadd5e3bdc5317777a408234248d7e28300b61060f4d3"
-            }
-          ],
-          "paste_block": "Run your market-analyst framework on this.\n\nTicker: AMZN\nPrice: $263.48 (-0.89% today, day range $259.92\u2013$264.945)\nTrigger: Catalyst theme 'AI / chips' \u2014 matched: nvidia\nRelated tickers: NVDA, AMD, TSM, MSFT\nRecent headlines:\n  - Nvidia: The Greatest Company At A Fair Price (SeekingAlpha) https://finnhub.io/api/news?id=e13ecf41fadd7f9e572dadd5e3bdc5317777a408234248d7e28300b61060f4d3\n\nInclude: a Setup Score (1\u20135, quality of the setup \u2014 not a buy call), a one-line plain-English aside for anything a newer trader wouldn't find obvious, and a ready-to-paste follow-up prompt to go deeper."
-        },
-        {
-          "type": "catalyst",
-          "ticker": "DKNG",
-          "reason": "Catalyst theme 'gaming / sports betting' \u2014 matched: draftkings",
-          "theme": "gaming / sports betting",
-          "relevant_tickers": [
-            "NTDOY",
-            "DKNG"
-          ],
-          "held": true,
-          "quote": {
-            "ticker": "DKNG",
-            "price": 24.79,
-            "change": -0.52,
-            "percent": -2.0545,
-            "high": 26.14,
-            "low": 24.61,
-            "prev_close": 25.31
-          },
-          "headlines": [
-            {
-              "headline": "DraftKings Boosts Liquidity With New $600 Million Capital Raise",
-              "source": "Benzinga",
-              "url": "https://finnhub.io/api/news?id=af344a6401640c9ebb1b39e19686c717968695bf9780988016349d53647568de"
-            }
-          ],
-          "paste_block": "Run your market-analyst framework on this.\n\nTicker: DKNG\nPrice: $24.79 (-2.05% today, day range $24.61\u2013$26.14)\nTrigger: Catalyst theme 'gaming / sports betting' \u2014 matched: draftkings\nRelated tickers: NTDOY, DKNG\nRecent headlines:\n  - DraftKings Boosts Liquidity With New $600 Million Capital Raise (Benzinga) https://finnhub.io/api/news?id=af344a6401640c9ebb1b39e19686c717968695bf9780988016349d53647568de\n\nInclude: a Setup Score (1\u20135, quality of the setup \u2014 not a buy call), a one-line plain-English aside for anything a newer trader wouldn't find obvious, and a ready-to-paste follow-up prompt to go deeper."
-        }
-      ],
-      "quotes": {
-        "IVV": {
-          "ticker": "IVV",
-          "price": 770,
-          "change": -2.74,
-          "percent": -0.3546,
-          "high": 771.81,
-          "low": 768.885,
-          "prev_close": 772.74
-        },
-        "AAPL": {
-          "ticker": "AAPL",
-          "price": 317.01,
-          "change": 0.18,
-          "percent": 0.0568,
-          "high": 320.28,
-          "low": 315.96,
-          "prev_close": 316.83
-        },
-        "SPGI": {
-          "ticker": "SPGI",
-          "price": 429.54,
-          "change": 2.88,
-          "percent": 0.675,
-          "high": 432,
-          "low": 425.67,
-          "prev_close": 426.66
-        },
-        "CRSP": {
-          "ticker": "CRSP",
-          "price": 59.25,
-          "change": -0.56,
-          "percent": -0.9363,
-          "high": 60.91,
-          "low": 57.32,
-          "prev_close": 59.81
-        },
-        "CHWY": {
-          "ticker": "CHWY",
-          "price": 23.74,
-          "change": -0.25,
-          "percent": -1.0421,
-          "high": 23.85,
-          "low": 23.25,
-          "prev_close": 23.99
-        },
-        "DKNG": {
-          "ticker": "DKNG",
-          "price": 24.79,
-          "change": -0.52,
-          "percent": -2.0545,
-          "high": 26.14,
-          "low": 24.61,
-          "prev_close": 25.31
-        },
-        "GME": {
-          "ticker": "GME",
-          "price": 17.91,
-          "change": -0.12,
-          "percent": -0.6656,
-          "high": 18.07,
-          "low": 17.79,
-          "prev_close": 18.03
-        },
-        "HYSR": {
-          "ticker": "HYSR",
-          "price": 0.0199,
-          "change": -0.0006,
-          "percent": -2.9268,
-          "high": 0.0207,
-          "low": 0.0197,
-          "prev_close": 0.0205
-        },
-        "SNDL": {
-          "ticker": "SNDL",
-          "price": 1.36,
-          "change": 0.05,
-          "percent": 3.8168,
-          "high": 1.37,
-          "low": 1.305,
-          "prev_close": 1.31
-        },
-        "SPY": {
-          "ticker": "SPY",
-          "price": 766.34,
-          "change": -2.72,
-          "percent": -0.3537,
-          "high": 768.15,
-          "low": 765.23,
-          "prev_close": 769.06
-        },
-        "QQQ": {
-          "ticker": "QQQ",
-          "price": 712.33,
-          "change": -3.75,
-          "percent": -0.5237,
-          "high": 715.085,
-          "low": 710.1337,
-          "prev_close": 716.08
-        },
-        "NVDA": {
-          "ticker": "NVDA",
-          "price": 216.95,
-          "change": -0.61,
-          "percent": -0.2804,
-          "high": 219.86,
-          "low": 215.66,
-          "prev_close": 217.56
-        },
-        "AMD": {
-          "ticker": "AMD",
-          "price": 463.9,
-          "change": -2.52,
-          "percent": -0.5403,
-          "high": 475.5299,
-          "low": 460.27,
-          "prev_close": 466.42
-        },
-        "MSFT": {
-          "ticker": "MSFT",
-          "price": 483.71,
-          "change": -0.6,
-          "percent": -0.1239,
-          "high": 484.16,
-          "low": 479.5,
-          "prev_close": 484.31
-        },
-        "TSM": {
-          "ticker": "TSM",
-          "price": 415.47,
-          "change": 3.38,
-          "percent": 0.8202,
-          "high": 417.96,
-          "low": 407.7183,
-          "prev_close": 412.09
-        },
-        "XBI": {
-          "ticker": "XBI",
-          "price": 163.7,
-          "change": -5.85,
-          "percent": -3.4503,
-          "high": 167.53,
-          "low": 163.25,
-          "prev_close": 169.55
-        },
-        "EDIT": {
-          "ticker": "EDIT",
-          "price": 3.21,
-          "change": -0.04,
-          "percent": -1.2308,
-          "high": 3.2390999999999996,
-          "low": 3.0201,
-          "prev_close": 3.25
-        },
-        "BEAM": {
-          "ticker": "BEAM",
-          "price": 28.08,
-          "change": -0.99,
-          "percent": -3.4056,
-          "high": 29.110000000000003,
-          "low": 26.98,
-          "prev_close": 29.07
-        },
-        "MRNA": {
-          "ticker": "MRNA",
-          "price": 131.52,
-          "change": -42.86,
-          "percent": -24.5785,
-          "high": 155,
-          "low": 130.35,
-          "prev_close": 174.38
-        },
-        "NTDOY": {
-          "ticker": "NTDOY",
-          "price": 13.79,
-          "change": -0.155,
-          "percent": -1.1115,
-          "high": 13.9,
-          "low": 13.51,
-          "prev_close": 13.945
-        },
-        "GOOGL": {
-          "ticker": "GOOGL",
-          "price": 341.65,
-          "change": -3.07,
-          "percent": -0.8906,
-          "high": 343.93,
-          "low": 338.5651,
-          "prev_close": 344.72
-        },
-        "AMZN": {
-          "ticker": "AMZN",
-          "price": 263.48,
-          "change": -2.36,
-          "percent": -0.8878,
           "high": 264.945,
           "low": 259.92,
           "prev_close": 265.84
